@@ -25,6 +25,9 @@ Route::namespace('API')->group(function() {
     Route::middleware(['auth:sanctum'])->group(function (){
         Route::post('logout', 'AuthController@logout');
         Route::apiResource('season', MasterSeasonController::class);
+        Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
+        Route::apiResource('jenis', JenisKamarController::class);
+        Route::get('jenis_all', 'JenisKamarController@getDataForAllFlag');
     });
 
 });

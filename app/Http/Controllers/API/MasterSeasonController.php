@@ -8,6 +8,7 @@ use App\Models\MasterSeason;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class MasterSeasonController extends Controller
@@ -16,6 +17,13 @@ class MasterSeasonController extends Controller
      * Display a listing of the resource.
      */
     public function index()
+    {
+        $data = MasterSeason::where('flag_stat', 1)->get();
+
+        return new PostResource('T', 'Berhasil Ambil Data Season..', $data);
+    }
+
+    public function getDataForAllFlag()
     {
         $data = MasterSeason::all();
 
@@ -37,7 +45,7 @@ class MasterSeasonController extends Controller
             'tgl_selesai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s
         ], [
             'required' => ':Attribute wajib diisi.',
-            'unique' => ':Attribute sudah ada. Silakan update saja!',
+            'unique' => ':Attribute sudah ada.',
             'max' => ':Attribute terlalu panjang!'
         ]);
 
@@ -114,7 +122,81 @@ class MasterSeasonController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $season = MasterSeason::find($id);
+
+        if(is_null($season)){
+            return response([
+                'status' => 'F',
+                'message' => 'Data Season tidak ditemukan!'
+            ], 404);
+        }
+
+        $userLogin = Auth::user(); //buat updated_by
+        $updateData = $request->all();
+
+        $validate = Validator::make($updateData, [
+            'nama_season' => 'required|max:255|unique:App\Models\MasterSeason,nama_season,'.$season['id'],
+            'jenis_season' => 'required|max:50',
+            'tgl_mulai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s
+            'tgl_selesai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s
+        ], [
+            'required' => ':Attribute wajib diisi.',
+            'unique' => ':Attribute sudah ada.',
+            'max' => ':Attribute terlalu panjang!'
+        ]);
+
+        if($validate->fails()){
+            return response([
+                'status' => 'F',
+                'message' => $validate->errors()
+            ], 400);
+        }
+
+        // Jika validasi berhasil, lanjutkan untuk memeriksa jarak minimal
+        $tglMulai = Carbon::parse($updateData['tgl_mulai']);
+        $tglSelesai = Carbon::parse($updateData['tgl_selesai']);
+        $today = Carbon::now();
+        
+        if($tglMulai <= $today){ 
+            return response([
+                'status' => 'F',
+                'message' => 'Tanggal mulai season tidak boleh sebelum hari ini!!'
+            ], 400);
+        }
+        if($tglMulai->diffInMonths($today) < 2){ 
+            return response([
+                'status' => 'F',
+                'message' => 'Tanggal mulai season harus berjarak minimal 2 bulan dari hari ini!!'
+            ], 400);
+        }
+        if($tglSelesai <= $tglMulai){
+            return response([
+                'status' => 'F',
+                'message' => 'Tanggal selesai harus lebih besar dari Tanggal mulai!!'
+            ], 400);
+        }
+
+        if(is_null($updateData['flag_stat']) || $updateData['flag_stat'] === ""){
+            $updateData['flag_stat'] = 1;
+        };
+        
+        $updateData['updated_by'] = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
+
+        $season['nama_season'] = $updateData['nama_season'];
+        $season['jenis_season'] = $updateData['jenis_season'];
+        $season['tgl_mulai'] = $updateData['tgl_mulai'];
+        $season['tgl_selesai'] = $updateData['tgl_selesai'];
+        $season['flag_stat'] = $updateData['flag_stat'];
+        $season['updated_by'] = $updateData['updated_by'];
+
+        if(!$season->save()){
+            return response([
+                'status' => 'F',
+                'message' => 'Gagal mengubah data!'
+            ], 400);
+        }
+
+        return new PostResource('T', 'Berhasil Mengubah Data Season', $season);
     }
 
     /**
@@ -122,6 +204,25 @@ class MasterSeasonController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $season = MasterSeason::find($id);
+
+        if(is_null($season)){
+            return response([
+                'status' => 'F',
+                'message' => 'Data Season tidak ditemukan!'
+            ], 404);
+        }
+
+        $deleted = DB::table('master_seasons')->where('id', $season->id)->update(['flag_stat' => 0]);
+
+        if($deleted){
+            return new PostResource('T', 'Berhasil Menghapus Data Season '.$season->nama_season, $deleted);
+        }
+
+        return response([
+            'status' => 'F',
+            'message' => 'Gagal menghapus data!'
+        ], 400);
     }
+
 }
