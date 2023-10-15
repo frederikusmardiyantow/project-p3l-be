@@ -38,6 +38,8 @@ Route::namespace('API')->group(function() {
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing'])->group(function (){
         Route::apiResource('season', MasterSeasonController::class);
         Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
+        Route::apiResource('layanan', MasterLayananBerbayarController::class);
+        Route::get('layanan_all', 'MasterLayananBerbayarController@getDataForAllFlag');
     });
 
 });
