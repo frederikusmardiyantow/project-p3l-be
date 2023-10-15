@@ -8,6 +8,7 @@ use App\Models\MasterCustomer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Validator;
 
@@ -21,6 +22,9 @@ class AuthController extends Controller
         $validate = Validator::make($login, [
             'email' => 'required|email:rfc,dns',
             'password' => 'required',
+        ], [
+            'required' => ':Attribute wajib diisi!',
+            'email' => 'Email tidak valid!',
         ]);
 
         if($validate->fails()){
@@ -42,7 +46,7 @@ class AuthController extends Controller
         }
 
         $user->nama_role = $user->role->nama_role;
-        
+
         $data = [
             'user' => $user,
             'authorization' => [
@@ -62,9 +66,23 @@ class AuthController extends Controller
             'no_identitas' => 'required|numeric|max_digits:50',
             'jenis_identitas' => 'required|string|max:50',
             'no_telp' => 'required|numeric|min_digits: 10|max_digits:15',
-            'email' => 'required|email:rfc,dns|unique:App\Models\MasterCustomer,email|unique:App\Models\MasterPegawai,email',
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                Rule::unique('App\Models\MasterCustomer', 'email'),
+                Rule::unique('App\Models\MasterPegawai', 'email'),
+            ],
             'password' => ['required', 'confirmed', Password::min(8)],
             'alamat' => 'required'
+        ], [
+            'required' => ':Attribute wajib diisi!',
+            'email' => 'Email tidak valid!',
+            'nama_customer.max' => 'Nama customer terlalu panjang! (max: 150 karakter)',
+            'jenis_identitas' => 'Jenis identitas terlalu panjang (max: 50 karakter)',
+            'max_digit' => ':Attribute terlalu pajang (max digit: 50)',
+            'unique' => 'Email ini sudah digunakan oleh pengguna lain!',
+            'confirmed' => 'Pasword tidak cocok!',
+            'min' => 'Password minimal 8 karakter!'
         ]);
 
         if($validate->fails()){

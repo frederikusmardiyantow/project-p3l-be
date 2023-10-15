@@ -58,7 +58,8 @@ class MasterKamarController extends Controller
             ], 400);
         }
 
-        if(!JenisKamar::find($addData['id_jenis_kamar'])){
+        $jenis = JenisKamar::find($addData['id_jenis_kamar']);
+        if(!$jenis || $jenis->flag_stat === 0){
             return response([
                 'status' => 'F',
                 'message' => 'Jenis Kamar tidak diketahui!'
@@ -140,7 +141,8 @@ class MasterKamarController extends Controller
             ], 400);
         }
 
-        if(!JenisKamar::find($updateData['id_jenis_kamar'])){
+        $jenis = JenisKamar::find($updateData['id_jenis_kamar']);
+        if(!$jenis || $jenis->flag_stat === 0){
             return response([
                 'status' => 'F',
                 'message' => 'Jenis Kamar tidak diketahui!'
