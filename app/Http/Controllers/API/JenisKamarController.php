@@ -186,7 +186,7 @@ class JenisKamarController extends Controller
     {
         $jenisKamar = JenisKamar::find($id);
 
-        if(is_null($jenisKamar)){
+        if(is_null($jenisKamar) || $jenisKamar->flag_stat === 0){
             return response([
                 'status' => 'F',
                 'message' => 'Data Jenis Kamar tidak ditemukan!'

@@ -179,7 +179,7 @@ class MasterKamarController extends Controller
     {
         $kamar = MasterKamar::find($id);
 
-        if(is_null($kamar)){
+        if(is_null($kamar) || $kamar->flag_stat === 0){
             return response([
                 'status' => 'F',
                 'message' => 'Data Kamar tidak ditemukan!'

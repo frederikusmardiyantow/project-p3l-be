@@ -206,7 +206,7 @@ class MasterSeasonController extends Controller
     {
         $season = MasterSeason::find($id);
 
-        if(is_null($season)){
+        if(is_null($season) || $season->flag_stat === 0){
             return response([
                 'status' => 'F',
                 'message' => 'Data Season tidak ditemukan!'

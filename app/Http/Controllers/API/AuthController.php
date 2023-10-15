@@ -41,6 +41,8 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $user->nama_role = $user->role->nama_role;
+        
         $data = [
             'user' => $user,
             'authorization' => [

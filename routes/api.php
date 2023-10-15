@@ -30,6 +30,8 @@ Route::namespace('API')->group(function() {
         Route::get('jenis_all', 'JenisKamarController@getDataForAllFlag');
         Route::apiResource('kamar', MasterKamarController::class);
         Route::get('kamar_all', 'MasterKamarController@getDataForAllFlag');
+        Route::apiResource('role', MasterRoleController::class);
+        Route::get('role_all', 'MasterRoleController@getDataForAllFlag');
         Route::apiResource('pegawai', MasterPegawaiController::class);
         Route::get('pegawai_all', 'MasterPegawaiController@getDataForAllFlag');
     });
