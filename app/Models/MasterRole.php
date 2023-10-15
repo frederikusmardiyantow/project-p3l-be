@@ -17,6 +17,11 @@ class MasterRole extends Model
         'updated_by'
     ];
 
+    public function pegawais()
+    {
+        return $this->hasMany(MasterPegawai::class, 'id_role', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');

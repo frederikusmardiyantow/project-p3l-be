@@ -22,6 +22,11 @@ class MasterPegawai extends Authenticatable
         'updated_by'
     ];
 
+    public function role()
+    {
+        return $this->belongsTo(MasterRole::class, 'id_role', 'id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
