@@ -22,12 +22,20 @@ Route::namespace('API')->group(function() {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@register');
     
-    Route::middleware(['auth:sanctum'])->group(function (){
+    Route::middleware(['auth:sanctum', 'checkRole:all'])->group(function (){
         Route::post('logout', 'AuthController@logout');
-        Route::apiResource('season', MasterSeasonController::class);
-        Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
+    });
+    Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
         Route::apiResource('jenis', JenisKamarController::class);
         Route::get('jenis_all', 'JenisKamarController@getDataForAllFlag');
+        Route::apiResource('kamar', MasterKamarController::class);
+        Route::get('kamar_all', 'MasterKamarController@getDataForAllFlag');
+        Route::apiResource('pegawai', MasterPegawaiController::class);
+        Route::get('pegawai_all', 'MasterPegawaiController@getDataForAllFlag');
+    });
+    Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing'])->group(function (){
+        Route::apiResource('season', MasterSeasonController::class);
+        Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
     });
 
 });

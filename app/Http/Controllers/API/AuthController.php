@@ -37,7 +37,7 @@ class AuthController extends Controller
         }else{
             return response()->json([
                 'status' => 'F',
-                'message' => 'Invalid credentials',
+                'message' => 'Email / Password yang dimasukkan salah!',
             ], 401);
         }
 
