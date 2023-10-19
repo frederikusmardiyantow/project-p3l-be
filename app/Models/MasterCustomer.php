@@ -25,6 +25,10 @@ class MasterCustomer extends Authenticatable
         'flag_stat'
     ];
 
+    public function trxReservasis() {
+        return $this->hasMany(MasterTrxReservasi::class, 'id_customer', 'id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

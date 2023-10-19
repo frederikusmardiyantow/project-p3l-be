@@ -22,9 +22,11 @@ class MasterPegawai extends Authenticatable
         'updated_by'
     ];
 
-    public function role()
-    {
+    public function role(){
         return $this->belongsTo(MasterRole::class, 'id_role', 'id');
+    }
+    public function invoices() {
+        return $this->hasMany(Invoice::class, 'id_invoice', 'id');
     }
 
     /**

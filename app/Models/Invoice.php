@@ -12,6 +12,7 @@ class Invoice extends Model
     
     protected $fillable = [
         'id_trx_reservasi',
+        'id_pegawai',
         'tgl_lunas',
         'total_harga_kamar',
         'total_harga_layanan',
@@ -19,6 +20,13 @@ class Invoice extends Model
         'total_semua',
         'created_by'
     ];
+
+    public function trxReservasis() {
+        return $this->belongsTo(MasterTrxReservasi::class, 'id_trx_reservasi', 'id');
+    }
+    public function pegawais() {
+        return $this->belongsTo(MasterPegawai::class, 'id_pegawai', 'id');
+    }
 
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){

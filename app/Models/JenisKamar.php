@@ -32,6 +32,16 @@ class JenisKamar extends Model
         );
     }
 
+    public function tarifs(){
+        return $this->hasMany(MasterTarif::class, 'id_jenis_kamar', 'id');
+    }
+    public function kamars() {
+        return $this->hasMany(MasterKamar::class, 'id_jenis_kamar', 'id');
+    }
+    public function trxKamars() {
+        return $this->hasMany(TrxReservasiKamar::class, 'id_jenis_kamar', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');

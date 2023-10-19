@@ -20,6 +20,10 @@ class MasterSeason extends Model
         'updated_by'
     ];
 
+    public function tarifs(){
+        return $this->hasMany(MasterTarif::class, 'id_season', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');

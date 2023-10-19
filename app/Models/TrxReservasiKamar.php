@@ -20,6 +20,16 @@ class TrxReservasiKamar extends Model
         'updated_by'
     ];
 
+    public function jenisKamars() {
+        return $this->belongsTo(JenisKamar::class, 'id_jenis_kamar', 'id');
+    }
+    public function kamars() {
+        return $this->belongsTo(MasterKamar::class, 'id_kamar', 'id');
+    }
+    public function trxReservasis() {
+        return $this->belongsTo(MasterTrxReservasi::class, 'id_trx_reservasi', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');

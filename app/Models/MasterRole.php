@@ -17,8 +17,7 @@ class MasterRole extends Model
         'updated_by'
     ];
 
-    public function pegawais()
-    {
+    public function pegawais(){
         return $this->hasMany(MasterPegawai::class, 'id_role', 'id');
     }
 

@@ -212,6 +212,17 @@ class MasterSeasonController extends Controller
                 'message' => 'Data Season tidak ditemukan!'
             ], 404);
         }
+        
+        // Jika validasi berhasil, lanjutkan untuk memeriksa jarak minimal
+        $tglMulai = Carbon::parse($season['tgl_mulai']);
+        $today = Carbon::now();
+        
+        if(($tglMulai <= $today) || ($tglMulai->diffInMonths($today) < 2)){ 
+            return response([
+                'status' => 'F',
+                'message' => 'Season hanya boleh dihapus dengan jarak minimal 2 bulan setelah hari ini!!'
+            ], 400);
+        }
 
         $deleted = DB::table('master_seasons')->where('id', $season->id)->update(['flag_stat' => 0]);
 

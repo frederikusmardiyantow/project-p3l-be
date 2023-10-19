@@ -20,6 +20,10 @@ class MasterLayananBerbayar extends Model
         'updated_by'
     ];
 
+    public function trxLayanans() {
+        return $this->hasMany(TrxLayananBerbayar::class, 'id_layanan', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');

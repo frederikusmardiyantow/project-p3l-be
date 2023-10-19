@@ -30,6 +30,19 @@ class MasterTrxReservasi extends Model
         'updated_by'
     ];
 
+    public function trxKamars() {
+        return $this->hasMany(TrxReservasiKamar::class, 'id_trx_reservasi', 'id');
+    }
+    public function invoices() {
+        return $this->hasMany(Invoice::class, 'id_trx_reservasi', 'id');
+    }
+    public function customers() {
+        return $this->belongsTo(MasterCustomer::class, 'id_customer', 'id');
+    }
+    public function trxLayanans() {
+        return $this->hasMany(TrxLayananBerbayar::class, 'id_trx_reservasi', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');

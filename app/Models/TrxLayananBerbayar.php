@@ -21,6 +21,13 @@ class TrxLayananBerbayar extends Model
         'updated_by'
     ];
 
+    public function trxReservasis() {
+        return $this->belongsTo(MasterTrxReservasi::class, 'id_trx_reservasi', 'id');
+    }
+    public function layanans() {
+        return $this->belongsTo(MasterLayananBerbayar::class, 'id_layanan', 'id');
+    }
+
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){
             return Carbon::parse($this->attributes['created_at'])->format('Y-m-d H:i:s');
