@@ -23,7 +23,11 @@ Route::namespace('API')->group(function() {
     Route::post('register', 'AuthController@register');
     
     Route::middleware(['auth:sanctum', 'checkRole:all'])->group(function (){
+        Route::post('ubahPassword', 'MasterCustomerController@ubahPassword');
         Route::post('logout', 'AuthController@logout');
+    });
+    Route::middleware(['auth:sanctum', 'checkRole:customer'])->group(function (){
+        Route::put('ubahProfile', 'MasterCustomerController@update');
     });
     Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
         Route::apiResource('jenis', JenisKamarController::class);
@@ -40,6 +44,8 @@ Route::namespace('API')->group(function() {
         Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
         Route::apiResource('layanan', MasterLayananBerbayarController::class);
         Route::get('layanan_all', 'MasterLayananBerbayarController@getDataForAllFlag');
+        Route::get('customer', 'MasterCustomerController@index');
+        Route::get('customer_all', 'MasterCustomerController@getDataForAllFlag');
     });
 
 });

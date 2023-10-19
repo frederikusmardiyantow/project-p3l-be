@@ -18,7 +18,9 @@ class CheckRole
     {
         $role_lower = strtolower($role); //ubah ke huruf kecil smua dlu
         $user = Auth::user();
-        if($role_lower !== 'all' && (!$user->role || strtolower($user->role->nama_role) !== $role_lower)){
+        if($user['jenis_customer'] && $role_lower === 'customer'){
+            return $next($request);
+        }else if($role_lower !== 'all' && (!$user->role || strtolower($user->role->nama_role) !== $role_lower)){
             return response([
                 'status' => 'F',
                 'message' => 'Anda tidak punya akses!'

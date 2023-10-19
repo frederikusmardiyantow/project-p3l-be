@@ -21,14 +21,14 @@ class MasterPegawaiController extends Controller
      */
     public function index()
     {
-        $data = MasterPegawai::where('flag_stat', 1)->get();
+        $data = MasterPegawai::with(['role'])->where('flag_stat', 1)->get();
 
         return new PostResource('T', 'Berhasil Ambil Data Pegawai..', $data);
     }
 
     public function getDataForAllFlag()
     {
-        $data = MasterPegawai::all();
+        $data = MasterPegawai::with(['role'])->get();
 
         return new PostResource('T', 'Berhasil Ambil Data All Pegawai..', $data);
     }
@@ -102,7 +102,7 @@ class MasterPegawaiController extends Controller
      */
     public function show(string $id)
     {
-        $pegawai = MasterPegawai::find($id);
+        $pegawai = MasterPegawai::with(['role'])->find($id);
 
         if(!is_null($pegawai)){
             return new PostResource('T', 'Berhasil Mendapatkan Data Pegawai '.$pegawai['nama_pegawai'], $pegawai);
