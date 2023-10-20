@@ -12,7 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Validator;
@@ -159,33 +160,27 @@ class AuthController extends Controller
             }
         }
 
-        //generate token
-        $length = 6; //token akan berjumlah 6 angka
-        $characters = '0123456789';
-        $token = '';
-        for ($i = 0; $i < $length; $i++) {
-            $token .= $characters[rand(0, strlen($characters) - 1)];
-        }
+        $token = Str::random(60);
+
+        $cacheKey = 'reset_token_' . $token;
+        // $expirationMinutes = 300; // Set the expiration time in detik! (5 menit (60x5))
+        Cache::put($cacheKey, $user->email);
+
+        // Generate the reset link. link ini yg digunakan di fe. jd di fe pastikan ada route ini.
+        $resetLink = url('/password/reset', $token);
 
         try{
             //Mengisi variabel yang akan ditampilkan pada view mail
-            $content = [
-                'token' => $token,
+            $data = [
+                'resetLink' => $resetLink,
             ];
-            
-            //Mengirim email
-            Mail::to($user['email'])->send(new ForgetPasswordMail($content));
-
-            // Simpan token di cache dengan waktu tertentu (contoh: 60 menit)
-            $cacheKey = 'reset_token_' . $token;
-            $expirationMinutes = 5; // Waktu kadaluarsa dalam menit
-
-            // Menyimpan token di cache dengan waktu kadaluarsa
-            Cache::put($cacheKey, $token, $expirationMinutes);
+    
+            // Send the email
+            Mail::to($user->email)->send(new ForgetPasswordMail($data));
 
             return response([
                 'status' => 'T',
-                'message' => "Token telah terkirim, cek email ya.."
+                'message' => "Email telah terkirim, cek email Anda untuk mereset kata sandi."
             ], 200);
 
         }catch(Exception $e){
@@ -196,22 +191,82 @@ class AuthController extends Controller
         }
     }
 
-    public function tokenVerification(Request $request){
-        $token = $request->input("token");
-
+    public function tokenVerification($token){
+        // cari token di cache
         $cacheKey = 'reset_token_' . $token;
-        $retrievedToken = Cache::get($cacheKey);
+        $userEmail = Cache::get($cacheKey);
 
-        if(!empty($retrievedToken)){
+        if(!$userEmail){
+            // Token tidak valid atau sudah kedaluwarsa
             return response([
-                'status' => 'T',
-                'message' => "Token berhasil diverifikasi.."
+                'status' => 'F',
+                'message' => "Token tidak valid atau sudah kedaluwarsa!"
+            ], 404);
+        }
+
+        // Token valid, kirimkan pengguna ke halaman reset password dengan token
+        return response([
+            'status' => 'T',
+            'message' => "Token valid. Silakan atur ulang kata sandi."
+        ], 200);
+    }
+
+    public function updatePassword(Request $request, $token){
+        // cari token di cache
+        $cacheKey = 'reset_token_' . $token;
+        $userEmail = Cache::get($cacheKey);
+
+        if(!$userEmail){
+            // Token tidak valid atau sudah kedaluwarsa
+            return response([
+                'status' => 'F',
+                'message' => "Token tidak valid atau sudah kedaluwarsa!"
+            ], 404);
+        }
+
+        $req = $request->all();
+
+        $validate = Validator::make($req, [
+            'password' => ['required', 'confirmed', Password::min(8)]
+        ], [
+            'required' => ':Attribute wajib diisi!',
+            'confirmed' => 'Pasword tidak cocok!',
+            'min' => 'Password minimal 8 karakter!'
+        ]);
+
+        if($validate->fails()){
+            return response([
+                'status' => 'F',
+                'email' => $userEmail,
+                'message' => $validate->errors()
             ], 400);
         }
 
-        return response([
-            'status' => 'F',
-            'message' => "Token tidak diketahui!"
-        ], 404);
+        // Temukan pengguna berdasarkan alamat email
+        $user = MasterCustomer::where('email', $userEmail)->first();
+
+        if (!$user) {
+            return response([
+                'status' => 'F',
+                'email' => $userEmail,
+                'message' => "User tidak ditemukan!"
+            ], 404);
+        }
+        
+        $req['password'] = Hash::make($request->password);
+
+        $user['password'] = $req['password'];
+
+        if(!$user->save()){
+            return response([
+                'status' => 'F',
+                'email' => $userEmail,
+                'message' => 'Gagal mengubah password!'
+            ], 400);
+        }
+
+        Cache::forget($cacheKey);
+        return new PostResource('T', 'Berhasil Mengubah Password', $user);
+
     }
 }

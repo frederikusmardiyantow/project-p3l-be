@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\Route;
 Route::namespace('API')->group(function() {
     Route::post('login', 'AuthController@login');
     Route::post('register', 'AuthController@register');
+    Route::post('forget/request','AuthController@forgetPassword');
+    Route::get('password/reset/{token}','AuthController@tokenVerification');
+    Route::post('forget/updatePassword/{token}','AuthController@updatePassword');
     
     Route::middleware(['auth:sanctum', 'checkRole:all'])->group(function (){
         Route::post('ubahPassword', 'MasterCustomerController@ubahPassword');

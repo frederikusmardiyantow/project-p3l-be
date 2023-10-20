@@ -8,7 +8,7 @@
     </head>
     <body>
         <h2>Lupa Password ya?</h2>
-        <p>Nih, token buat ubah passwordmu</p>
-        <p> {{ $content['body'] }} </p>
+        <p>Nih, klik link ini ya buat reset password..</p>
+        <p> {{ $content['resetLink'] }} </p>
     </body>
 </html>
