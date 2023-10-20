@@ -47,6 +47,8 @@ Route::namespace('API')->group(function() {
         Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
         Route::apiResource('layanan', MasterLayananBerbayarController::class);
         Route::get('layanan_all', 'MasterLayananBerbayarController@getDataForAllFlag');
+        Route::apiResource('tarif', MasterTarifController::class);
+        Route::get('tarif_all', 'MasterTarifController@getDataForAllFlag');
         Route::get('customer', 'MasterCustomerController@index');
         Route::get('customer_all', 'MasterCustomerController@getDataForAllFlag');
     });
