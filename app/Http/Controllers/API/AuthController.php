@@ -246,11 +246,15 @@ class AuthController extends Controller
         $user = MasterCustomer::where('email', $userEmail)->first();
 
         if (!$user) {
-            return response([
-                'status' => 'F',
-                'email' => $userEmail,
-                'message' => "User tidak ditemukan!"
-            ], 404);
+            $user = MasterPegawai::where('email', $userEmail)->first();
+
+            if(!$user){
+                return response([
+                    'status' => 'F',
+                    'email' => $userEmail,
+                    'message' => "User tidak ditemukan!"
+                ], 404);
+            }
         }
         
         $req['password'] = Hash::make($request->password);
