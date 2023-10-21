@@ -86,6 +86,7 @@ class MasterPegawaiController extends Controller
         $addData['password'] = Hash::make($request->password);
 
         $pegawai = MasterPegawai::create($addData);
+        $pegawai->role;
 
         if(!$pegawai){
             return response([
@@ -181,6 +182,7 @@ class MasterPegawaiController extends Controller
             ], 400);
         }
 
+        $pegawai->role;
         return new PostResource('T', 'Berhasil Mengubah Data Pegawai', $pegawai);
     }
 

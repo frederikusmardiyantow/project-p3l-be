@@ -18,14 +18,14 @@ class MasterKamarController extends Controller
      */
     public function index()
     {
-        $data = MasterKamar::where('flag_stat', 1)->get();
+        $data = MasterKamar::with(["jenisKamars"])->where('flag_stat', 1)->get();
 
         return new PostResource('T', 'Berhasil Ambil Data Kamar..', $data);
     }
 
     public function getDataForAllFlag()
     {
-        $data = MasterKamar::all();
+        $data = MasterKamar::with(["jenisKamars"])->get();
 
         return new PostResource('T', 'Berhasil Ambil Data All Kamar..', $data);
     }
@@ -75,6 +75,7 @@ class MasterKamarController extends Controller
         $addData['updated_by'] = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
 
         $kamar = MasterKamar::create($addData);
+        $kamar->jenisKamars;
 
         if(!$kamar){
             return response([
@@ -91,7 +92,7 @@ class MasterKamarController extends Controller
      */
     public function show(string $id)
     {
-        $kamar = MasterKamar::find($id);
+        $kamar = MasterKamar::with(["jenisKamars"])->find($id);
 
         if(!is_null($kamar)){
             return new PostResource('T', 'Berhasil Mendapatkan Data Kamar '.$kamar['nomor_kamar'], $kamar);
@@ -123,7 +124,7 @@ class MasterKamarController extends Controller
 
         $validate = Validator::make($updateData, [
             'id_jenis_kamar' => 'required',
-            'nomor_kamar' => 'required|numeric|min:100|unique:App\Models\MasterKamar,nomor_kamar,'.$kamar['nomor_kamar'],
+            'nomor_kamar' => 'required|numeric|min:100|unique:App\Models\MasterKamar,nomor_kamar,'.$kamar['id'],
             'jenis_bed' => 'required',
             'nomor_lantai' => 'required',
             'smoking_area' => 'required'
@@ -171,6 +172,7 @@ class MasterKamarController extends Controller
             ], 400);
         }
 
+        $kamar->jenisKamars; //ditaruh sini biar response jenis kamar berubah jg ketika update id jenis kamarnya.
         return new PostResource('T', 'Berhasil Mengubah Data kamar', $kamar);
     }
 

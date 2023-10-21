@@ -54,6 +54,8 @@ Route::namespace('API')->group(function() {
         Route::get('customer/{id}', 'MasterCustomerController@show');
         Route::get('customer_all', 'MasterCustomerController@getDataForAllFlag');
         Route::post('register/group', 'AuthController@register');
+        Route::apiResource('transaksi/detail', MasterTrxReservasiController::class);
+        Route::get('transaksi/detail_all', 'MasterTrxReservasiController@getDataForAllFlag');
     });
     // Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
 

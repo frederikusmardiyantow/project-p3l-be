@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+            $table->string('no_invoice');
             $table->foreignId('id_trx_reservasi')->constrained(
                 table: 'master_trx_reservasis', indexName: 'resv_inv_id'
             )->cascadeOnUpdate()->restrictOnDelete();
