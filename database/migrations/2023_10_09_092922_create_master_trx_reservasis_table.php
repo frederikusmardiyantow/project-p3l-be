@@ -17,7 +17,12 @@ return new class extends Migration
                 table: 'master_customers', indexName: 'cust_resv_id'
             )->cascadeOnUpdate()->restrictOnDelete();
             $table->string('id_booking', 150)->nullable(true);
-            $table->string('nama_pic', 150)->nullable(true);
+            $table->foreignId('id_pic')->nullable()->constrained(
+                table: 'master_pegawais', indexName: 'pegawai_pic_id'
+            )->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreignId('id_fo')->nullable()->constrained(
+                table: 'master_pegawais', indexName: 'pegawai_fo_id'
+            )->cascadeOnUpdate()->restrictOnDelete();
             $table->integer('jumlah_dewasa');
             $table->integer('jumlah_anak_anak');
             $table->text('req_layanan')->nullable(true);

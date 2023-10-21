@@ -42,6 +42,12 @@ class MasterTrxReservasi extends Model
     public function trxLayanans() {
         return $this->hasMany(TrxLayananBerbayar::class, 'id_trx_reservasi', 'id');
     }
+    public function pic() {
+        return $this->belongsTo(MasterPegawai::class, 'id_pic', 'id');
+    }
+    public function fo() {
+        return $this->belongsTo(MasterPegawai::class, 'id_fo', 'id');
+    }
 
     public function getCreatedAtAttribute(){
         if(!is_null($this->attributes['created_at'])){

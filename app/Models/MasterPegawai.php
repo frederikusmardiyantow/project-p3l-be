@@ -28,6 +28,12 @@ class MasterPegawai extends Authenticatable
     public function invoices() {
         return $this->hasMany(Invoice::class, 'id_invoice', 'id');
     }
+    public function pic() {
+        return $this->hasMany(MasterTrxReservasi::class, 'id_pic', 'id');
+    }
+    public function fo() {
+        return $this->hasMany(MasterTrxReservasi::class, 'id_fo', 'id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

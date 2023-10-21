@@ -14,14 +14,14 @@ class MasterTrxReservasiController extends Controller
      */
     public function index()
     {
-        $data = MasterTrxReservasi::with(["customers"])->where('flag_stat', 1)->get();
+        $data = MasterTrxReservasi::with(["customers", "pic", "fo"])->where('flag_stat', 1)->get();
 
         return new PostResource('T', 'Berhasil Ambil Data Trx Reservasi..', $data);
     }
 
     public function getDataForAllFlag()
     {
-        $data = MasterTrxReservasi::with(["customers"])->get();
+        $data = MasterTrxReservasi::with(["customers", "pic", "fo"])->get();
 
         return new PostResource('T', 'Berhasil Ambil Data All Trx Reservasi..', $data);
     }
@@ -40,7 +40,7 @@ class MasterTrxReservasiController extends Controller
      */
     public function show(string $id)
     {
-        $reservasi = MasterTrxReservasi::with(["customers", "trxLayanans.layanans", "trxKamars.jenisKamars", "trxKamars.kamars", "invoices.pegawais.role"])->find($id);
+        $reservasi = MasterTrxReservasi::with(["customers", "pic", "fo", "trxLayanans.layanans", "trxKamars.jenisKamars", "trxKamars.kamars", "invoices.pegawais.role"])->find($id);
 
         if(!is_null($reservasi)){
             return new PostResource('T', 'Berhasil Mendapatkan Data Trx Reservasi '.$reservasi->customers['nama_customer'], $reservasi);
