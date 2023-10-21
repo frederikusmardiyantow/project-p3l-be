@@ -66,7 +66,8 @@ class AuthController extends Controller
     {
         $regisData = $request->all();
 
-        $validate = Validator::make($regisData, [
+        $validasi = [
+            'jenis_customer' => 'required|in:G,P',
             'nama_customer' => 'required|string|max:150',
             'no_identitas' => 'required|numeric|max_digits:50',
             'jenis_identitas' => 'required|string|max:50',
@@ -77,9 +78,16 @@ class AuthController extends Controller
                 Rule::unique('App\Models\MasterCustomer', 'email'),
                 Rule::unique('App\Models\MasterPegawai', 'email'),
             ],
-            'password' => ['required', 'confirmed', Password::min(8)],
             'alamat' => 'required'
-        ], [
+        ];
+        if($regisData['jenis_customer'] === 'G'){
+            // cek jika jenis customer = G maka nama institusi wajib diisi!
+            $validasi['nama_institusi'] = 'required';
+        }else{
+            $validasi['password'] = ['required', 'confirmed', Password::min(8)];
+        }
+
+        $validate = Validator::make($regisData, $validasi, [
             'required' => ':Attribute wajib diisi!',
             'email' => 'Email tidak valid!',
             'nama_customer.max' => 'Nama customer terlalu panjang! (max: 150 karakter)',
@@ -87,7 +95,8 @@ class AuthController extends Controller
             'max_digit' => ':Attribute terlalu pajang (max digit: 50)',
             'unique' => 'Email ini sudah digunakan oleh pengguna lain!',
             'confirmed' => 'Pasword tidak cocok!',
-            'min' => 'Password minimal 8 karakter!'
+            'min' => 'Password minimal 8 karakter!',
+            'in' => 'Inputan hanya G atau P!'
         ]);
 
         if($validate->fails()){
@@ -167,7 +176,7 @@ class AuthController extends Controller
         Cache::put($cacheKey, $user->email);
 
         // Generate the reset link. link ini yg digunakan di fe. jd di fe pastikan ada route ini.
-        $resetLink = url('/password/reset', $token);
+        $resetLink = url('/password/reset', $token); //hasilnya bakal http://127.0.0.1:8000/password/reset/{tokennya}
 
         try{
             //Mengisi variabel yang akan ditampilkan pada view mail

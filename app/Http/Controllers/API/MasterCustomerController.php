@@ -66,7 +66,8 @@ class MasterCustomerController extends Controller
 
         $updateData = $request->all();
 
-        $validate = Validator::make($updateData, [
+        $validasi = [
+            'jenis_customer' => 'required|in:G,P',
             'nama_customer' => 'required|string|max:150',
             'no_identitas' => 'required|numeric|max_digits:50',
             'jenis_identitas' => 'required|string|max:50',
@@ -74,17 +75,24 @@ class MasterCustomerController extends Controller
             'email' => [
                 'required',
                 'email:rfc,dns',
-                Rule::unique('App\Models\MasterCustomer', 'email')->ignore(MasterCustomer::find($id)),
+                Rule::unique('App\Models\MasterCustomer', 'email'),
                 Rule::unique('App\Models\MasterPegawai', 'email'),
             ],
             'alamat' => 'required'
-        ], [
+        ];
+        if($updateData['jenis_customer'] === 'G'){
+            // cek jika jenis customer = G maka nama institusi wajib diisi!
+            $validasi['nama_institusi'] = 'required';
+        }
+
+        $validate = Validator::make($updateData, $validasi, [
             'required' => ':Attribute wajib diisi!',
             'email' => 'Email tidak valid!',
             'nama_customer.max' => 'Nama customer terlalu panjang! (max: 150 karakter)',
             'jenis_identitas' => 'Jenis identitas terlalu panjang (max: 50 karakter)',
             'max_digit' => ':Attribute terlalu pajang (max digit: 50)',
-            'unique' => 'Email ini sudah digunakan oleh pengguna lain!'
+            'unique' => 'Email ini sudah digunakan oleh pengguna lain!',
+            'in' => 'Inputan hanya G atau P!'
         ]);
 
         if($validate->fails()){
@@ -92,6 +100,15 @@ class MasterCustomerController extends Controller
                 'status' => 'F',
                 'message' => $validate->errors()
             ], 400);
+        }
+
+        if(($data['jenis_customer'] !== $updateData['jenis_customer']) && $updateData['jenis_customer'] === 'G'){
+            // jika perubahan dari personal ke grup, set password menjadi null
+            $data['password'] = NULL;
+        }else{
+            // ini perubahan dari group ke personal
+            // set password default "12345678"
+            $data['password'] = Hash::make('12345678');
         }
 
         if(is_null($updateData['flag_stat']) || $updateData['flag_stat'] === ""){
@@ -142,6 +159,22 @@ class MasterCustomerController extends Controller
         ], 400);
     }
 
+    public function getProfile(){
+        $customer = Auth::user();
+
+        if(!$customer || $customer->flag_stat === 0){
+            return response([
+                'status' => 'F',
+                'message' => "Customer tidak diketahui!"
+            ], 404);
+        }
+
+        return response([
+            'status' => 'T',
+            'message' => $customer
+        ], 200);
+    }
+
     public function ubahPassword(Request $request)
     {
         $customer = Auth::user();
@@ -177,13 +210,13 @@ class MasterCustomerController extends Controller
         }else if(!$cek){
             return response([
                 'status' => 'F',
-                'message' => 'Password lama tidak diketahui!'
+                'message' => 'Password salah, silakan cek kembali!'
             ], 404);
         }
 
         return response([
             'status' => 'F',
-            'message' => 'Gagal ubah Password!'
-        ], 400);
+            'message' => 'Gagal ubah Password, ada kesalahan sistem!'
+        ], 500);
     }
 }

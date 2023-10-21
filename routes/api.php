@@ -31,6 +31,7 @@ Route::namespace('API')->group(function() {
     });
     Route::middleware(['auth:sanctum', 'checkRole:customer'])->group(function (){
         Route::put('ubahProfile', 'MasterCustomerController@update');
+        Route::get('profile','MasterCustomerController@getProfile');
     });
     Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
         Route::apiResource('jenis', JenisKamarController::class);
@@ -50,8 +51,13 @@ Route::namespace('API')->group(function() {
         Route::apiResource('tarif', MasterTarifController::class);
         Route::get('tarif_all', 'MasterTarifController@getDataForAllFlag');
         Route::get('customer', 'MasterCustomerController@index');
+        Route::get('customer/{id}', 'MasterCustomerController@show');
         Route::get('customer_all', 'MasterCustomerController@getDataForAllFlag');
+        Route::post('register/group', 'AuthController@register');
     });
+    // Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
+
+    // });
 
 });
 
