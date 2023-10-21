@@ -32,6 +32,7 @@ Route::namespace('API')->group(function() {
     Route::middleware(['auth:sanctum', 'checkRole:customer'])->group(function (){
         Route::put('ubahProfile', 'MasterCustomerController@update');
         Route::get('profile','MasterCustomerController@getProfile');
+        Route::get('transaksi','MasterCustomerController@riwayatTrxByMe');
     });
     Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
         Route::apiResource('jenis', JenisKamarController::class);
@@ -56,6 +57,7 @@ Route::namespace('API')->group(function() {
         Route::post('register/group', 'AuthController@register');
         Route::apiResource('transaksi/detail', MasterTrxReservasiController::class);
         Route::get('transaksi/detail_all', 'MasterTrxReservasiController@getDataForAllFlag');
+        Route::get('transaksi/{id}','MasterCustomerController@riwayatTrxBySM');
     });
     // Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
 

@@ -219,4 +219,26 @@ class MasterCustomerController extends Controller
             'message' => 'Gagal ubah Password, ada kesalahan sistem!'
         ], 500);
     }
+
+    public function riwayatTrxByMe(){ //hanya tampil riwayat untuk yg sedang login
+        $user = Auth::user();
+        $user->trxReservasis;
+
+        return new PostResource('T', 'Berhasil Ambil Data Riwayat Transaksi..', $user);
+    }
+
+    public function riwayatTrxBySM(string $id){ //tampil riwayat untuk customer yg dipilih SM
+        
+        $customer = MasterCustomer::find($id); // mencari id customer yg diinginkan
+
+        if(is_null($customer) || $customer->flag_stat === 0){
+            return response([
+                'status' => 'F',
+                'message' => 'Data Customer tidak ditemukan!'
+            ], 404);
+        }
+
+        $customer->trxReservasis;
+        return new PostResource('T', 'Berhasil Ambil Data Riwayat Transaksi..', $customer);
+    }
 }
