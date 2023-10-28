@@ -20,14 +20,14 @@ class JenisKamarController extends Controller
     {
         $data = JenisKamar::where('flag_stat', 1)->get();
 
-        return new PostResource('T', 'Berhasil Ambil Data Season..', $data);
+        return new PostResource('T', 'Berhasil Ambil Data Jenis Kamar..', $data);
     }
 
     public function getDataForAllFlag()
     {
         $data = JenisKamar::all();
 
-        return new PostResource('T', 'Berhasil Ambil Data All Season..', $data);
+        return new PostResource('T', 'Berhasil Ambil Data All Jenis Kamar..', $data);
     }
 
     /**
@@ -82,7 +82,7 @@ class JenisKamarController extends Controller
             ], 500);
         }
 
-        return new PostResource('T', 'Berhasil Menambah Data Season '.$season['nama_season'], $season);
+        return new PostResource('T', 'Berhasil Menambah Data Jenis Kamar '.$season['nama_season'], $season);
     }
 
     /**
@@ -93,7 +93,7 @@ class JenisKamarController extends Controller
         $jenisKamar = JenisKamar::find($id);
 
         if(!is_null($jenisKamar)){
-            return new PostResource('T', 'Berhasil Mendapatkan Data Season '.$jenisKamar['nama_season'], $jenisKamar);
+            return new PostResource('T', 'Berhasil Mendapatkan Data Jenis Kamar '.$jenisKamar['nama_season'], $jenisKamar);
         }
 
         return response([

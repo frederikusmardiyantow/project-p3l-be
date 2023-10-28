@@ -20,6 +20,13 @@ class MasterKamarController extends Controller
     {
         $data = MasterKamar::with(["jenisKamars"])->where('flag_stat', 1)->get();
 
+        // if($data->data.length === 0){
+        //     return response([
+        //         'status' => 'F',
+        //         'message' => 'Data tidak ditemukan'
+        //     ], 404);
+        // }
+
         return new PostResource('T', 'Berhasil Ambil Data Kamar..', $data);
     }
 
@@ -40,7 +47,7 @@ class MasterKamarController extends Controller
 
         $validate = Validator::make($addData, [
             'id_jenis_kamar' => 'required',
-            'nomor_kamar' => 'required|numeric|min:100|unique:App\Models\MasterKamar,nomor_kamar',
+            'nomor_kamar' => 'required|numeric|min:100|unique_with_flag_stat:master_kamars,nomor_kamar,flag_stat',
             'jenis_bed' => 'required',
             'nomor_lantai' => 'required',
             'smoking_area' => 'required'

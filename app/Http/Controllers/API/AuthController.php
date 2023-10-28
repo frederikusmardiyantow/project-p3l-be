@@ -42,7 +42,43 @@ class AuthController extends Controller
 
         if(Auth::guard('customer')->attempt($login)){
             $user = Auth::guard('customer')->user();
-        }else if(Auth::guard('pegawai')->attempt($login)){
+        }else{
+            return response()->json([
+                'status' => 'F',
+                'message' => 'Email / Password yang dimasukkan salah!',
+            ], 401);
+        }
+
+        $data = [
+            'user' => $user,
+            'authorization' => [
+                'token' => $user->createToken('ApiToken')->plainTextToken,
+                'type' => 'bearer',
+            ]
+        ];
+        return new PostResource('T', 'Berhasil Login..', $data);
+    }
+
+    public function loginAdmin(Request $request)
+    {
+        $login = $request->only('email', 'password');
+
+        $validate = Validator::make($login, [
+            'email' => 'required|email:rfc,dns',
+            'password' => 'required',
+        ], [
+            'required' => ':Attribute wajib diisi!',
+            'email' => 'Email tidak valid!',
+        ]);
+
+        if($validate->fails()){
+            return response([
+                'status' => 'F',
+                'message' => $validate->errors()
+            ], 400);
+        }
+
+        if(Auth::guard('pegawai')->attempt($login)){
             $user = Auth::guard('pegawai')->user();
             $user->role;
         }else{
@@ -92,7 +128,8 @@ class AuthController extends Controller
             'email' => 'Email tidak valid!',
             'nama_customer.max' => 'Nama customer terlalu panjang! (max: 150 karakter)',
             'jenis_identitas' => 'Jenis identitas terlalu panjang (max: 50 karakter)',
-            'max_digit' => ':Attribute terlalu pajang (max digit: 50)',
+            'min_digits' => ':Attribute harus berisi minimal 10 digit',
+            'max_digits' => ':Attribute terlalu pajang (max digit: 15)',
             'unique' => 'Email ini sudah digunakan oleh pengguna lain!',
             'confirmed' => 'Pasword tidak cocok!',
             'min' => 'Password minimal 8 karakter!',

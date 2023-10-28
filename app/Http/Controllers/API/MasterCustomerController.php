@@ -75,7 +75,7 @@ class MasterCustomerController extends Controller
             'email' => [
                 'required',
                 'email:rfc,dns',
-                Rule::unique('App\Models\MasterCustomer', 'email'),
+                Rule::unique('App\Models\MasterCustomer', 'email')->ignore(MasterCustomer::find($id)),
                 Rule::unique('App\Models\MasterPegawai', 'email'),
             ],
             'alamat' => 'required'
@@ -160,18 +160,22 @@ class MasterCustomerController extends Controller
     }
 
     public function getProfile(){
-        $customer = Auth::user();
+        $user = Auth::user();
 
-        if(!$customer || $customer->flag_stat === 0){
+        if(!$user || $user->flag_stat === 0){
             return response([
                 'status' => 'F',
-                'message' => "Customer tidak diketahui!"
+                'message' => "User tidak diketahui!"
             ], 404);
+        }
+        if($user->id_role){
+            $user->role;
         }
 
         return response([
             'status' => 'T',
-            'message' => $customer
+            'message' => 'Berhasil Mendapatkan Data',
+            'data' => $user
         ], 200);
     }
 
@@ -210,7 +214,9 @@ class MasterCustomerController extends Controller
         }else if(!$cek){
             return response([
                 'status' => 'F',
-                'message' => 'Password salah, silakan cek kembali!'
+                'message' => [
+                    "password_lama" => 'Password Lama salah, silakan cek kembali!'
+                ]
             ], 404);
         }
 

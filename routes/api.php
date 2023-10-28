@@ -20,22 +20,27 @@ use Illuminate\Support\Facades\Route;
 
 Route::namespace('API')->group(function() {
     Route::post('login', 'AuthController@login');
+    Route::post('login/admin', 'AuthController@loginAdmin');
     Route::post('register', 'AuthController@register');
     Route::post('forget/request','AuthController@forgetPassword');
     Route::get('password/reset/{token}','AuthController@tokenVerification');
     Route::post('forget/updatePassword/{token}','AuthController@updatePassword');
+    Route::get('jenis', 'JenisKamarController@index');
+    Route::get('jenis/{id}', 'JenisKamarController@show');
     
     Route::middleware(['auth:sanctum', 'checkRole:all'])->group(function (){
         Route::post('ubahPassword', 'MasterCustomerController@ubahPassword');
         Route::post('logout', 'AuthController@logout');
+        Route::get('profile','MasterCustomerController@getProfile');
     });
     Route::middleware(['auth:sanctum', 'checkRole:customer'])->group(function (){
         Route::put('ubahProfile', 'MasterCustomerController@update');
-        Route::get('profile','MasterCustomerController@getProfile');
         Route::get('transaksi','MasterCustomerController@riwayatTrxByMe');
     });
     Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
-        Route::apiResource('jenis', JenisKamarController::class);
+        Route::post('jenis', 'JenisKamarController@store');
+        Route::patch('jenis/{id}', 'JenisKamarController@update');
+        Route::delete('jenis/{id}', 'JenisKamarController@destroy');
         Route::get('jenis_all', 'JenisKamarController@getDataForAllFlag');
         Route::apiResource('kamar', MasterKamarController::class);
         Route::get('kamar_all', 'MasterKamarController@getDataForAllFlag');
@@ -55,13 +60,15 @@ Route::namespace('API')->group(function() {
         Route::get('customer/{id}', 'MasterCustomerController@show');
         Route::get('customer_all', 'MasterCustomerController@getDataForAllFlag');
         Route::post('register/group', 'AuthController@register');
-        Route::apiResource('transaksi/detail', MasterTrxReservasiController::class);
+        // Route::post('transaksi/detail', 'MasterTrxReservasiController@store');
+        // Route::put('transaksi/detail/{id}', 'MasterTrxReservasiController@update');
+        // Route::delete('transaksi/detail/{id}', 'MasterTrxReservasiController@destroy');
         Route::get('transaksi/detail_all', 'MasterTrxReservasiController@getDataForAllFlag');
         Route::get('transaksi/{id}','MasterCustomerController@riwayatTrxBySM');
     });
-    // Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
-
-    // });
+    Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
+        Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
+    });
 
 });
 
