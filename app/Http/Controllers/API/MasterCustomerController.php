@@ -32,6 +32,13 @@ class MasterCustomerController extends Controller
         return new PostResource('T', 'Berhasil Ambil Data All Customer..', $data);
     }
 
+    public function getAllCustomerGroup()
+    {
+        $data = MasterCustomer::where('jenis_customer', "G")->get();
+
+        return new PostResource('T', 'Berhasil Ambil Data Customer Group..', $data);
+    }
+
     /**
      * Display the specified resource.
      */
@@ -235,7 +242,7 @@ class MasterCustomerController extends Controller
 
     public function riwayatTrxBySM(string $id){ //tampil riwayat untuk customer yg dipilih SM
         
-        $customer = MasterCustomer::find($id); // mencari id customer yg diinginkan
+        $customer = MasterCustomer::with(['trxReservasis.pic', 'trxReservasis.fo'])->find($id); // mencari id customer yg diinginkan
 
         if(is_null($customer) || $customer->flag_stat === 0){
             return response([

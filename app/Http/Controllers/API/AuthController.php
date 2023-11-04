@@ -40,6 +40,16 @@ class AuthController extends Controller
             ], 400);
         }
 
+        $cekCust = MasterCustomer::where('email', $request->email)->first();
+        if($cekCust){
+            if($cekCust->jenis_customer === 'G'){
+                return response()->json([
+                    'status' => 'F',
+                    'message' => 'Anda adalah Customer Group. Tidak dapat melakukan login!',
+                ], 404);
+            }
+        }
+        
         if(Auth::guard('customer')->attempt($login)){
             $user = Auth::guard('customer')->user();
         }else{
@@ -48,6 +58,7 @@ class AuthController extends Controller
                 'message' => 'Email / Password yang dimasukkan salah!',
             ], 401);
         }
+
 
         $data = [
             'user' => $user,
@@ -213,7 +224,9 @@ class AuthController extends Controller
         Cache::put($cacheKey, $user->email);
 
         // Generate the reset link. link ini yg digunakan di fe. jd di fe pastikan ada route ini.
-        $resetLink = url('/password/reset', $token); //hasilnya bakal http://127.0.0.1:8000/password/reset/{tokennya}
+        $emailAppUrl = env('APP_URL_EMAIL');
+        $resetLink = $emailAppUrl . '/resetPassword/' . $token;
+        // $resetLink = url('/password/reset', $token); //hasilnya bakal http://127.0.0.1:8000/password/reset/{tokennya}
 
         try{
             //Mengisi variabel yang akan ditampilkan pada view mail
