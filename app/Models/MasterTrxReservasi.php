@@ -13,7 +13,8 @@ class MasterTrxReservasi extends Model
     protected $fillable = [
         'id_customer',
         'id_booking',
-        'nama_pic',
+        'id_pic',
+        'id_fo',
         'jumlah_dewasa',
         'jumlah_anak_anak',
         'req_layanan',
@@ -24,7 +25,9 @@ class MasterTrxReservasi extends Model
         'waktu_pembayaran',
         'waktu_reservasi',
         'uang_jaminan',
+        'deposit',
         'status',
+        'bukti_pembayaran',
         'flag_stat',
         'created_by',
         'updated_by'

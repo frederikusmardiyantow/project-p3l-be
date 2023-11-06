@@ -33,7 +33,9 @@ return new class extends Migration
             $table->dateTime('waktu_pembayaran')->nullable(true);
             $table->dateTime('waktu_reservasi');
             $table->integer('uang_jaminan')->nullable(true);
+            $table->integer('deposit')->nullable(true);
             $table->string('status', 150);
+            $table->text('bukti_pembayaran')->nullable(true);
             $table->boolean('flag_stat');
             $table->string('created_by', 150)->nullable(true);
             $table->string('updated_by', 150)->nullable(true);
