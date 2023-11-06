@@ -66,11 +66,15 @@ Route::namespace('API')->group(function() {
         // Route::delete('transaksi/detail/{id}', 'MasterTrxReservasiController@destroy');
         Route::get('transaksi/detail_all', 'MasterTrxReservasiController@getDataForAllFlag');
         Route::get('transaksi/{id}','MasterCustomerController@riwayatTrxBySM');
+        Route::get('export/pdf/{id}', 'PDFController@exportPDF');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
         Route::get('ketersediaan/kamar', 'KamarSediaController@KamarSediaPersonal');
-
+        Route::post('transaksi/reservasi/kamar','MasterTrxReservasiController@entryDataReservasi');
+        Route::post('transaksi/reservasi/upload/{id}','MasterTrxReservasiController@uploadBuktiPembayaran');
+        Route::post('transaksi/pembatalan/kamar/{id}','MasterTrxReservasiController@pembatalanReservasi');
+        Route::get('transaksi/pembatalan/cekPengembalian/{id}','MasterTrxReservasiController@cekPengembalianDanaOrTidak');
     });
 
 });
