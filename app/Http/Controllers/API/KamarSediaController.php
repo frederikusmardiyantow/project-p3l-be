@@ -25,7 +25,6 @@ class KamarSediaController extends Controller
             "tgl_check_out"=> "required",
             "jumlah_dewasa"=> "required",
             "jumlah_anak_anak"=> "required",
-            "jumlah_kamar"=> "required",
         ]);
 
         if($validate->fails()){
@@ -53,23 +52,24 @@ class KamarSediaController extends Controller
             ], 400);
         }
 
-        // untuk pengecekan inputan jumlah orang atau total orang yg nginap dengan inputan kamar yang diinginkan
-        $totalOrang = $data['jumlah_dewasa'] + $data['jumlah_anak_anak'];
-        if($totalOrang == 1){
-            $kamarYgSeharusnyaDiPesan = ceil($totalOrang/2); //ceil untuk pembulatan angka ke atas
-        }else{
-            $kamarYgSeharusnyaDiPesan = floor($totalOrang/2); //floor untuk membulatkan angka ke bawah
-        }
-        if($data['jumlah_kamar'] < $kamarYgSeharusnyaDiPesan){
-            return response([
-                'status' => 'F',
-                'message' => 'Jumlah Kamar yang dipesan tidak sesuai penginap!!'
-            ], 400);
-        }
+        // // untuk pengecekan inputan jumlah orang atau total orang yg nginap dengan inputan kamar yang diinginkan
+        // $totalOrang = $data['jumlah_dewasa'] + $data['jumlah_anak_anak'];
+        // if($totalOrang == 1){
+        //     $kamarYgSeharusnyaDiPesan = ceil($totalOrang/2); //ceil untuk pembulatan angka ke atas
+        // }else{
+        //     $kamarYgSeharusnyaDiPesan = floor($totalOrang/2); //floor untuk membulatkan angka ke bawah
+        // }
+        // if($data['jumlah_kamar'] < $kamarYgSeharusnyaDiPesan){
+        //     return response([
+        //         'status' => 'F',
+        //         'message' => 'Jumlah Kamar yang dipesan tidak sesuai penginap!!'
+        //     ], 400);
+        // }
 
         // untuk menampilkan kamar beserta jumlah kamar keseluruhan by jenis kamar dan juga menampilkan data jenis kamar beserta harga dasar
-        $jumlahKamarPerJenis = MasterKamar::select('id_jenis_kamar', \DB::raw('COUNT(*) as jumlah_kamar'), 'jenis_kamars.jenis_kamar as jenis_kamar', 'jenis_kamars.harga_dasar as harga_dasar')
+        $jumlahKamarPerJenis = MasterKamar::select('master_kamars.id_jenis_kamar', \DB::raw('COUNT(*) as jumlah_kamar'), 'jenis_kamars.jenis_kamar as jenis_kamar', 'jenis_kamars.harga_dasar as harga_dasar')
         ->join('jenis_kamars', 'master_kamars.id_jenis_kamar', '=', 'jenis_kamars.id')
+        ->where('master_kamars.flag_stat', '!=', 0)
         ->groupBy('id_jenis_kamar', 'jenis_kamars.jenis_kamar', 'jenis_kamars.harga_dasar')
         ->get();
 
@@ -80,7 +80,7 @@ class KamarSediaController extends Controller
             $query->where('waktu_check_in', '<', $data['tgl_check_out'])->where('waktu_check_out', '>', $data['tgl_check_out']);
         })->OrWhere(function($query) use ($data) {
             $query->where('waktu_check_in', '>=', $data['tgl_check_in'])->where('waktu_check_out', '<=', $data['tgl_check_out']);
-        })->with('trxKamars')->get();
+        })->where('flag_stat', '!=', 0)->where('status', '!=', 'Batal')->with('trxKamars')->get();
 
         // untuk mengecek apakah tgl-check-in yg diinputkan masuk dalam season tertentu atau tidak.
         // Di select nya dipakein as. kalo ndak error e 
