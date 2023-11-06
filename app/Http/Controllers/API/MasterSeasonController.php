@@ -39,7 +39,7 @@ class MasterSeasonController extends Controller
         $addData = $request->all();
 
         $validate = Validator::make($addData, [
-            'nama_season' => 'required|max:255|unique:App\Models\MasterSeason,nama_season',
+            'nama_season' => 'required|max:255|unique_with_flag_stat_add:master_seasons,nama_season,flag_stat',
             'jenis_season' => 'required|max:50',
             'tgl_mulai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s
             'tgl_selesai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s
@@ -135,7 +135,7 @@ class MasterSeasonController extends Controller
         $updateData = $request->all();
 
         $validate = Validator::make($updateData, [
-            'nama_season' => 'required|max:255|unique:App\Models\MasterSeason,nama_season,'.$season['id'],
+            'nama_season' => 'required|max:255|unique_with_flag_stat_update:master_seasons,nama_season,flag_stat,'.$season['id'],
             'jenis_season' => 'required|max:50',
             'tgl_mulai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s
             'tgl_selesai' => 'required|date|date_format:Y-m-d H:i:s', //formatnya harus Y-m-d H:i:s

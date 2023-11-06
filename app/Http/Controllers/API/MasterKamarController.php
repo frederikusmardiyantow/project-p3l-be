@@ -47,7 +47,7 @@ class MasterKamarController extends Controller
 
         $validate = Validator::make($addData, [
             'id_jenis_kamar' => 'required',
-            'nomor_kamar' => 'required|numeric|min:100|unique_with_flag_stat:master_kamars,nomor_kamar,flag_stat',
+            'nomor_kamar' => 'required|numeric|min:100|unique_with_flag_stat_add:master_kamars,nomor_kamar,flag_stat',
             'jenis_bed' => 'required',
             'nomor_lantai' => 'required',
             'smoking_area' => 'required'
@@ -55,7 +55,7 @@ class MasterKamarController extends Controller
             'required' => ':Attribute wajib diisi.',
             'numeric' => ':Attribute harus berupa angka',
             'nomor_kamar.min' => 'Nomor kamar minimal 100',
-            'unique' => ':Attribute sudah ada.'
+            'unique_with_flag_stat_add' => ':Attribute sudah ada.'
         ]);
 
         if($validate->fails()){
@@ -131,7 +131,7 @@ class MasterKamarController extends Controller
 
         $validate = Validator::make($updateData, [
             'id_jenis_kamar' => 'required',
-            'nomor_kamar' => 'required|numeric|min:100|unique:App\Models\MasterKamar,nomor_kamar,'.$kamar['id'],
+            'nomor_kamar' => 'required|numeric|min:100|unique_with_flag_stat_update:master_kamars,nomor_kamar,flag_stat,'.$kamar['id'],
             'jenis_bed' => 'required',
             'nomor_lantai' => 'required',
             'smoking_area' => 'required'
@@ -139,7 +139,7 @@ class MasterKamarController extends Controller
             'required' => ':Attribute wajib diisi.',
             'numeric' => ':Attribute harus berupa angka',
             'nomor_kamar.min' => 'Nomor kamar minimal 100',
-            'unique' => ':Attribute sudah ada.'
+            'unique_with_flag_stat_update' => ':Attribute sudah ada.'
         ]);
 
         if($validate->fails()){

@@ -39,7 +39,7 @@ class JenisKamarController extends Controller
         $addData = $request->all();
 
         $validate = Validator::make($addData, [
-            'jenis_kamar' => 'required',
+            'jenis_kamar' => 'required|unique_with_flag_stat_add:jenis_kamars,jenis_kamar,flag_stat',
             'ukuran_kamar' => 'required|numeric',
             'fasilitas_kamar' => 'required',
             'deskripsi' => 'required',
@@ -121,7 +121,7 @@ class JenisKamarController extends Controller
         $updateData = $request->all();
 
         $validate = Validator::make($updateData, [
-            'jenis_kamar' => 'required',
+            'jenis_kamar' => 'required|unique_with_flag_stat_update:jenis_kamars,jenis_kamar,flag_stat,'.$jenisKamar['id'],
             'ukuran_kamar' => 'required|numeric',
             'fasilitas_kamar' => 'required',
             'deskripsi' => 'required',

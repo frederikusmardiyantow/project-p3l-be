@@ -38,7 +38,7 @@ class MasterLayananBerbayarController extends Controller
         $addData = $request->all();
 
         $validate = Validator::make($addData, [
-            'nama_layanan' => 'required|string|max:150',
+            'nama_layanan' => 'required|string|max:150|unique_with_flag_stat_add:master_layanan_berbayars,nama_layanan,flag_stat',
             'harga' => 'required|numeric',
             'satuan' => 'required|string|max:150'
         ], [
@@ -109,7 +109,7 @@ class MasterLayananBerbayarController extends Controller
         $updateData = $request->all();
 
         $validate = Validator::make($updateData, [
-            'nama_layanan' => 'required|string|max:150',
+            'nama_layanan' => 'required|string|max:150|unique_with_flag_stat_update:master_layanan_berbayars,nama_layanan,flag_stat,'.$layanan['id'],
             'harga' => 'required|numeric',
             'satuan' => 'required|string|max:150'
         ], [

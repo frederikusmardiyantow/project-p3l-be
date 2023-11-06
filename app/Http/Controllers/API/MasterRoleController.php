@@ -38,7 +38,7 @@ class MasterRoleController extends Controller
         $addData = $request->all();
 
         $validate = Validator::make($addData, [
-            'nama_role' => 'required|max:150'
+            'nama_role' => 'required|max:150|unique_with_flag_stat_add:master_roles,nama_role,flag_stat'
         ], [
             'required' => ':Attribute wajib diisi.',
             'max' => ':Attribute terlalu panjang! (max: 150 karakter)'
@@ -106,7 +106,7 @@ class MasterRoleController extends Controller
         $updateData = $request->all();
 
         $validate = Validator::make($updateData, [
-            'nama_role' => 'required|max:150'
+            'nama_role' => 'required|max:150|unique_with_flag_stat_update:master_roles,nama_role,flag_stat,'.$role['id']
         ], [
             'required' => ':Attribute wajib diisi.',
             'max' => ':Attribute terlalu panjang! (max: 150 karakter)'
