@@ -70,7 +70,7 @@ Route::namespace('API')->group(function() {
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
-        Route::get('ketersediaan/kamar', 'KamarSediaController@KamarSediaPersonal');
+        Route::post('ketersediaan/kamar', 'KamarSediaController@KamarSediaPersonal');
         Route::post('transaksi/reservasi/kamar','MasterTrxReservasiController@entryDataReservasi');
         Route::post('transaksi/reservasi/upload/{id}','MasterTrxReservasiController@uploadBuktiPembayaran');
         Route::post('transaksi/pembatalan/kamar/{id}','MasterTrxReservasiController@pembatalanReservasi');
