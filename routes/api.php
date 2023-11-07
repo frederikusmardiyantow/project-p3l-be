@@ -27,6 +27,7 @@ Route::namespace('API')->group(function() {
     Route::post('forget/updatePassword/{token}','AuthController@updatePassword');
     Route::get('jenis', 'JenisKamarController@index');
     Route::get('jenis/{id}', 'JenisKamarController@show');
+    Route::post('ketersediaan/kamar', 'KamarSediaController@KamarSediaPersonal');
     
     Route::middleware(['auth:sanctum', 'checkRole:all'])->group(function (){
         Route::post('ubahPassword', 'MasterCustomerController@ubahPassword');
@@ -70,7 +71,6 @@ Route::namespace('API')->group(function() {
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
-        Route::post('ketersediaan/kamar', 'KamarSediaController@KamarSediaPersonal');
         Route::post('transaksi/reservasi/kamar','MasterTrxReservasiController@entryDataReservasi');
         Route::post('transaksi/reservasi/upload/{id}','MasterTrxReservasiController@uploadBuktiPembayaran');
         Route::post('transaksi/pembatalan/kamar/{id}','MasterTrxReservasiController@pembatalanReservasi');
