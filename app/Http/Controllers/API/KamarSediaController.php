@@ -132,7 +132,7 @@ class KamarSediaController extends Controller
             }
 
             return response()->json([
-                'status' => 'F', 
+                'status' => 'T', 
                 'message' => 'Sudah ada reservasi lain di tanggal tersebut!', 
                 'data' => $jumlahKamarPerJenis
             ], 200);
