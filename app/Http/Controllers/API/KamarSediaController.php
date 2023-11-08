@@ -71,7 +71,7 @@ class KamarSediaController extends Controller
         ->join('jenis_kamars', 'master_kamars.id_jenis_kamar', '=', 'jenis_kamars.id')
         ->where('master_kamars.flag_stat', '!=', 0)
         ->groupBy('id_jenis_kamar', 'jenis_kamars.jenis_kamar', 'jenis_kamars.harga_dasar')
-        ->get();
+        ->with('jenisKamars')->get();
 
         // untuk mengecek kamar yg tersedia di rentang waktu inputan tgl-check-in dan tgl-check-out
         $kamarYgTersedia = MasterTrxReservasi::where(function($query) use ($data) {
