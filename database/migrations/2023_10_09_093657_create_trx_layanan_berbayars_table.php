@@ -21,7 +21,7 @@ return new class extends Migration
             )->cascadeOnUpdate()->restrictOnDelete();
             $table->integer('jumlah');
             $table->integer('total_harga');
-            $table->dateTime('waktu_pemakaian');
+            $table->dateTime('waktu_pemakaian')->nullable(true);
             $table->boolean('flag_stat');
             $table->string('created_by', 150)->nullable(true);
             $table->string('updated_by', 150)->nullable(true);

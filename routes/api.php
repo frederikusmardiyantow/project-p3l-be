@@ -75,6 +75,7 @@ Route::namespace('API')->group(function() {
         Route::post('transaksi/pembatalan/kamar/{id}','MasterTrxReservasiController@pembatalanReservasi');
         Route::get('transaksi/pembatalan/cekPengembalian/{id}','MasterTrxReservasiController@cekPengembalianDanaOrTidak');
         Route::apiResource('layanan', MasterLayananBerbayarController::class);
+        Route::post('transaksi/layanan', 'TrxLayananBerbayarController@store');
     });
 
 });
