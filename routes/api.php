@@ -53,7 +53,6 @@ Route::namespace('API')->group(function() {
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing'])->group(function (){
         Route::apiResource('season', MasterSeasonController::class);
         Route::get('season_all', 'MasterSeasonController@getDataForAllFlag');
-        Route::apiResource('layanan', MasterLayananBerbayarController::class);
         Route::get('layanan_all', 'MasterLayananBerbayarController@getDataForAllFlag');
         Route::apiResource('tarif', MasterTarifController::class);
         Route::get('tarif_all', 'MasterTarifController@getDataForAllFlag');
@@ -75,6 +74,7 @@ Route::namespace('API')->group(function() {
         Route::post('transaksi/reservasi/upload/{id}','MasterTrxReservasiController@uploadBuktiPembayaran');
         Route::post('transaksi/pembatalan/kamar/{id}','MasterTrxReservasiController@pembatalanReservasi');
         Route::get('transaksi/pembatalan/cekPengembalian/{id}','MasterTrxReservasiController@cekPengembalianDanaOrTidak');
+        Route::apiResource('layanan', MasterLayananBerbayarController::class);
     });
 
 });
