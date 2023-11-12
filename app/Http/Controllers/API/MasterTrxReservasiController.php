@@ -7,6 +7,7 @@ use App\Http\Resources\PostResource;
 use App\Models\JenisKamar;
 use App\Models\MasterCustomer;
 use App\Models\MasterTrxReservasi;
+use App\Models\TrxLayananBerbayar;
 use App\Models\TrxReservasiKamar;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -408,6 +409,28 @@ class MasterTrxReservasiController extends Controller
         }
 
         $updated_by = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
+
+         // Update status pada tabel trx_reservasi_kamars
+        $updateStatusTrxReservasiKamars = TrxReservasiKamar::where('id_trx_reservasis', $cekReservasi['id'])->update([
+            'flag_stat' => 0
+        ]);
+        if(!$updateStatusTrxReservasiKamars){
+            return response([
+                'status' => 'F',
+                'message' => 'Terjadi kesalahan pada server'
+            ], 500);
+        }
+
+        // Update status pada tabel trx_layanan_berbayar
+        $updateStatusTrxLayananBerbayar = TrxLayananBerbayar::where('id_trx_reservasi', $cekReservasi['id'])->update([
+            'flag_stat' => 0
+        ]);
+        if(!$updateStatusTrxLayananBerbayar){
+            return response([
+                'status' => 'F',
+                'message' => 'Terjadi kesalahan pada server'
+            ], 500);
+        }
 
         $updateStatus = MasterTrxReservasi::where('id', $id)->update([
             'status' => 'Batal',
