@@ -411,7 +411,7 @@ class MasterTrxReservasiController extends Controller
         $updated_by = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
 
          // Update status pada tabel trx_reservasi_kamars
-        $updateStatusTrxReservasiKamars = TrxReservasiKamar::where('id_trx_reservasis', $cekReservasi['id'])->update([
+        $updateStatusTrxReservasiKamars = TrxReservasiKamar::where('id_trx_reservasi', $id)->update([
             'flag_stat' => 0
         ]);
         if(!$updateStatusTrxReservasiKamars){
@@ -422,7 +422,7 @@ class MasterTrxReservasiController extends Controller
         }
 
         // Update status pada tabel trx_layanan_berbayar
-        $updateStatusTrxLayananBerbayar = TrxLayananBerbayar::where('id_trx_reservasi', $cekReservasi['id'])->update([
+        $updateStatusTrxLayananBerbayar = TrxLayananBerbayar::where('id_trx_reservasi', $id)->update([
             'flag_stat' => 0
         ]);
         if(!$updateStatusTrxLayananBerbayar){
