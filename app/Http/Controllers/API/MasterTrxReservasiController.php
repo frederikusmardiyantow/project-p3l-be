@@ -55,6 +55,7 @@ class MasterTrxReservasiController extends Controller
             'jumlah_anak_anak' => 'required',
             'waktu_check_in' => 'required',
             'waktu_check_out' => 'required',
+            'jumlah_malam' => 'required',
         ];
         if($prefiks === 'G'){
             // cek jika yg login adalah SM maka id customer wajib diisi!
@@ -128,7 +129,7 @@ class MasterTrxReservasiController extends Controller
                 $totalHarga += $hargaPerMalam;
             }
         }
-        $addData['total_harga'] = $totalHarga;
+        $addData['total_harga'] = $totalHarga * $addData['jumlah_malam'];
 
         // untuk pengecekan kembali jumlah orang atau total orang yg nginap dengan inputan kamar yang dilakukan
         $totalOrang = $addData['jumlah_dewasa'] + $addData['jumlah_anak_anak'];
@@ -155,7 +156,7 @@ class MasterTrxReservasiController extends Controller
         // menghitung jumlah malam
         $tglCheckIn = Carbon::parse($addData['waktu_check_in']);
         $tglCheckOut = Carbon::parse($addData['waktu_check_out']);
-        $addData['jumlah_malam'] = $tglCheckIn->diffInDays($tglCheckOut);
+        // $addData['jumlah_malam'] = $tglCheckIn->diffInDays($tglCheckOut);
         $addData['status'] = 'Menunggu Pembayaran';
         $addData['uang_jaminan'] = 0;
         $addData['deposit'] = 0;
