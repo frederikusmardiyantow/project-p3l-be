@@ -108,11 +108,7 @@
             @if ($req_layanan == null)
                 <p class="ml-4 text-muted font-italic">- Tidak ada data permintaan khusus -</p>
             @else
-                <ul>
-                    @foreach($req_layanan as $item)
-                        <li>-. {{ $item }}</li>
-                    @endforeach
-                </ul>
+                <p class="ml-4">{{ $req_layanan }}</p>
             @endif
         </div>
 
