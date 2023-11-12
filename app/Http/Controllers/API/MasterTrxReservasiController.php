@@ -391,6 +391,12 @@ class MasterTrxReservasiController extends Controller
                 'message' => 'Data Trx Reservasi tidak ditemukan!'
             ], 404);
         }
+        if($cekReservasi->status == 'Batal'){
+            return response([
+                'status' => 'F',
+                'message' => 'Transaksi sudah dibatalkan sejak'+$cekReservasi->updated_at
+            ], 404);
+        }
 
         $checkIn = Carbon::parse($cekReservasi['waktu_check_in']);
         $selisihHari = $today->diffInDays($checkIn);
