@@ -394,8 +394,8 @@ class MasterTrxReservasiController extends Controller
         if($cekReservasi->status == 'Batal'){
             return response([
                 'status' => 'F',
-                'message' => 'Transaksi sudah dibatalkan sejak'+$cekReservasi->updated_at
-            ], 404);
+                'message' => "Transaksi sudah dibatalkan sejak $cekReservasi->updated_at"
+            ], 403);
         }
 
         $checkIn = Carbon::parse($cekReservasi['waktu_check_in']);
