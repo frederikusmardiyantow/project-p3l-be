@@ -38,6 +38,11 @@ class KamarSediaController extends Controller
         $tglCheckIn = Carbon::parse($data['tgl_check_in']);
         $tglCheckOut = Carbon::parse($data['tgl_check_out']);
         $today = Carbon::now();
+        // Cek apakah waktu saat ini sudah melewati jam 14:00:00
+        if ($today->hour >= 14) {
+            // Jika sudah, atur waktu menjadi jam 13:00:00
+            $today->setTime(13, 0, 0);
+        }
         
         if($tglCheckIn < $today){ 
             return response([
