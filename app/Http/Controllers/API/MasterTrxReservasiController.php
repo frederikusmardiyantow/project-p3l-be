@@ -310,6 +310,13 @@ class MasterTrxReservasiController extends Controller
                 'message' => $validate->errors()
             ], 400);
         }
+        //jika uang jaminan tidak memenuhi syarat
+        if($customer === 'G' && ($data['uang_jaminan'] <= 0 || $data['uang_jaminan'] < ($cekReservasi['total_harga']/2))){
+            return response([
+                'status' => 'F',
+                'message' => 'Gagal upload! Uang Jaminan kurang!'
+            ], 403);
+        }
 
         $data['updated_by'] = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
 
