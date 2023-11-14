@@ -74,8 +74,9 @@ class PDFController extends Controller
             'anak_anak' => $cekReservasi->jumlah_anak_anak,
             'tanggal_cetak' => $tanggal_cetak->format('d M Y H:i:s'),
             'tanggal_pembayaran' => $tanggal_pembayaran->format('d F Y H:i:s'),
-            'total_harga' => $totalHarga,
+            'total_harga' => $totalHarga * $cekReservasi['jumlah_malam'],
             'jumlahKamarPerJenis' => $jumlahKamarPerJenis,
+            'jumlahMalam' => $cekReservasi['jumlah_malam'],
             'req_layanan' => $cekReservasi->req_layanan
         ]; // Data yang akan dimasukkan ke dalam PDF
 

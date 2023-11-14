@@ -78,10 +78,11 @@
             <table class='table table-bordered lh-base'>
                 <thead>
                     <tr style="text-align: center">
-                        <th>No.</th>
+                        {{-- <th>No.</th> --}}
                         <th>Jenis Kamar</th>
-                        <th>Jumlah</th>
+                        <th>Jumlah Kamar</th>
                         <th>Harga</th>
+                        <th>Jumlah Malam</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -89,11 +90,12 @@
                     @php $i=1 @endphp
                     @foreach($jumlahKamarPerJenis as $data)
                     <tr style="text-align: center">
-                        <td>{{ $i++ }}</td>
+                        {{-- <td>{{ $i++ }}</td> --}}
                         <td>{{ $data->jenis_kamar }}</td>
                         <td>{{ $data->jumlah }}</td>
                         <td style="text-align: right;">{{ "Rp " . number_format($data->harga_per_malam, 0, ',', '.') . ",-" }}</td>
-                        <td style="text-align: right">{{ "Rp " . number_format($data->total_per_jenis, 0, ',', '.') . ",-" }}</td>
+                        <td>{{ $jumlahMalam }}</td>
+                        <td style="text-align: right">{{ "Rp " . number_format($data->total_per_jenis * $jumlahMalam, 0, ',', '.') . ",-" }}</td>
                     </tr>
                     @endforeach
                     <tr style="text-align: right">
