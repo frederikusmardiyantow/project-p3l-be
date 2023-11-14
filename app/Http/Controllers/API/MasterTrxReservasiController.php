@@ -424,7 +424,7 @@ class MasterTrxReservasiController extends Controller
         if(!$updateStatusTrxReservasiKamars){
             return response([
                 'status' => 'F',
-                'message' => 'Terjadi kesalahan pada server'
+                'message' => 'Terjadi kesalahan pada server 1'
             ], 500);
         }
 
@@ -435,7 +435,7 @@ class MasterTrxReservasiController extends Controller
         if(!$updateStatusTrxLayananBerbayar){
             return response([
                 'status' => 'F',
-                'message' => 'Terjadi kesalahan pada server'
+                'message' => 'Terjadi kesalahan pada server 2'
             ], 500);
         }
 
@@ -448,7 +448,7 @@ class MasterTrxReservasiController extends Controller
         if(!$updateStatus){
             return response([
                 'status' => 'F',
-                'message' => 'Terjadi kesalahan pada server'
+                'message' => 'Terjadi kesalahan pada server 3'
             ], 500);
         }
 
