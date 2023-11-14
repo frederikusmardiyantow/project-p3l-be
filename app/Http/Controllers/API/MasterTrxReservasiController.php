@@ -429,15 +429,16 @@ class MasterTrxReservasiController extends Controller
         }
 
         // Update status pada tabel trx_layanan_berbayar
-        $updateStatusTrxLayananBerbayar = TrxLayananBerbayar::where('id_trx_reservasi', $id)->update([
+        // $updateStatusTrxLayananBerbayar = 
+        TrxLayananBerbayar::where('id_trx_reservasi', $id)->update([
             'flag_stat' => 0
         ]);
-        if(!$updateStatusTrxLayananBerbayar){
-            return response([
-                'status' => 'F',
-                'message' => 'Terjadi kesalahan pada server 2'
-            ], 500);
-        }
+        // if(!$updateStatusTrxLayananBerbayar){
+        //     return response([
+        //         'status' => 'F',
+        //         'message' => 'Terjadi kesalahan pada server 2'
+        //     ], 500);
+        // }
 
         $updateStatus = MasterTrxReservasi::where('id', $id)->update([
             'status' => 'Batal',
