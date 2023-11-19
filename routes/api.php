@@ -61,10 +61,6 @@ Route::namespace('API')->group(function() {
         Route::get('customer/{id}', 'MasterCustomerController@show');
         Route::get('customer_all', 'MasterCustomerController@getDataForAllFlag');
         Route::post('register/group', 'AuthController@register');
-        // Route::post('transaksi/detail', 'MasterTrxReservasiController@store');
-        // Route::put('transaksi/detail/{id}', 'MasterTrxReservasiController@update');
-        // Route::delete('transaksi/detail/{id}', 'MasterTrxReservasiController@destroy');
-        Route::get('transaksi/detail_all', 'MasterTrxReservasiController@getDataForAllFlag');
         Route::get('transaksi/{id}','MasterCustomerController@riwayatTrxBySM');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer'])->group(function (){
@@ -76,10 +72,10 @@ Route::namespace('API')->group(function() {
         Route::post('transaksi/layanan', 'TrxLayananBerbayarController@store');
         Route::get('export/pdf/{id}', 'PDFController@exportPDF');
     });
-    Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer,Front Office
-    '])->group(function (){
+    Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer,Front Office'])->group(function (){
+        Route::get('transaksi/reservasi/show', 'MasterTrxReservasiController@index');
+        Route::get('transaksi/reservasi/show_all', 'MasterTrxReservasiController@getDataForAllFlag');
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
-        Route::get('transaksi/detail', 'MasterTrxReservasiController@index');
     });
 
 });

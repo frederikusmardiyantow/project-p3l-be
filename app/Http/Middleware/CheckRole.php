@@ -19,8 +19,9 @@ class CheckRole
         $roles = array_slice(func_get_args(), 2); //mengambil semua argumen yang diberikan ke dalam fungsi (termasuk argumen setelah argumen pertama dan kedua)
         // Dalam konteks ini, itu berarti $roles akan berisi semua argumen yang diberikan setelah $request dan $next. Jadi, jika memanggil middleware dengan: $this->middleware('checkRole:admin,customer'); Maka $roles akan berisi array ['admin', 'customer'].
         $role_lower = array_map('strtolower', $roles); // Ubah semua elemen dalam array menjadi huruf kecil
-        
+        // echo(implode(', ', $role_lower));
         $user = Auth::user();
+        // echo($user);
         if(($user['jenis_customer'] && in_array('customer', $role_lower)) || in_array('all', $role_lower) || ($user->role && in_array(strtolower($user->role->nama_role), $role_lower))) {
             return $next($request);
         }else {
