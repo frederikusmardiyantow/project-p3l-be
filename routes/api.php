@@ -73,9 +73,14 @@ Route::namespace('API')->group(function() {
         Route::get('export/pdf/{id}', 'PDFController@exportPDF');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer,Front Office'])->group(function (){
+        
         Route::get('transaksi/reservasi/show', 'MasterTrxReservasiController@index');
         Route::get('transaksi/reservasi/show_all', 'MasterTrxReservasiController@getDataForAllFlag');
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
+    });
+    Route::middleware(['auth:sanctum', 'checkRole:Front Office'])->group(function (){
+        // Route::post('reservasi/kamar/check-in/{id_trx_reservasi}/{id_jenis_kamar}', 'TrxReservasiKamarController@fixCheckInWithDeposit');
+        Route::get('reservasi/kamar/check-in/{id_trx_reservasi}/cek-waktu', 'TrxReservasiKamarController@cekWaktuCheckIn');
     });
 
 });
