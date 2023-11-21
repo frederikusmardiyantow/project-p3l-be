@@ -38,12 +38,14 @@ Route::namespace('API')->group(function() {
         Route::put('ubahProfile', 'MasterCustomerController@update');
         Route::get('transaksi','MasterCustomerController@riwayatTrxByMe');
     });
+    Route::middleware(['auth:sanctum', 'checkRole:admin,Front Office'])->group(function (){
+        Route::apiResource('kamar', MasterKamarController::class);
+    });
     Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
         Route::post('jenis', 'JenisKamarController@store');
         Route::patch('jenis/{id}', 'JenisKamarController@update');
         Route::delete('jenis/{id}', 'JenisKamarController@destroy');
         Route::get('jenis_all', 'JenisKamarController@getDataForAllFlag');
-        Route::apiResource('kamar', MasterKamarController::class);
         Route::get('kamar_all', 'MasterKamarController@getDataForAllFlag');
         Route::apiResource('role', MasterRoleController::class);
         Route::get('role_all', 'MasterRoleController@getDataForAllFlag');
