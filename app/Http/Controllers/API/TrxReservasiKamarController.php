@@ -15,6 +15,21 @@ use Validator;
 
 class TrxReservasiKamarController extends Controller
 {
+
+    public function index()
+    {
+        $data = TrxReservasiKamar::with(["jenisKamars", "kamars", "trxReservasis"])->where('flag_stat', 1)->get();
+
+        return new PostResource('T', 'Berhasil Ambil Data Trx Kamar..', $data);
+    }
+
+    public function getDataForAllFlag()
+    {
+        $data = TrxReservasiKamar::with(["jenisKamars", "kamars", "trxReservasis"])->get();
+
+        return new PostResource('T', 'Berhasil Ambil Data All Trx Kamar..', $data);
+    }
+
     function cekWaktuCheckIn(string $id_trx_reservasi){
         $today = Carbon::now();
 

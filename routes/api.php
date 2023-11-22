@@ -40,6 +40,7 @@ Route::namespace('API')->group(function() {
     });
     Route::middleware(['auth:sanctum', 'checkRole:admin,Front Office'])->group(function (){
         Route::apiResource('kamar', MasterKamarController::class);
+        Route::get('reservasi/kamar', 'TrxReservasiKamarController@index');
     });
     Route::middleware(['auth:sanctum', 'checkRole:admin'])->group(function (){
         Route::post('jenis', 'JenisKamarController@store');
@@ -51,6 +52,7 @@ Route::namespace('API')->group(function() {
         Route::get('role_all', 'MasterRoleController@getDataForAllFlag');
         Route::apiResource('pegawai', MasterPegawaiController::class);
         Route::get('pegawai_all', 'MasterPegawaiController@getDataForAllFlag');
+        Route::get('reservasi/kamar_all', 'TrxReservasiKamarController@getDataForAllFlag');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing'])->group(function (){
         Route::apiResource('season', MasterSeasonController::class);
@@ -82,6 +84,7 @@ Route::namespace('API')->group(function() {
     });
     Route::middleware(['auth:sanctum', 'checkRole:Front Office'])->group(function (){
         // Route::post('reservasi/kamar/check-in/{id_trx_reservasi}/{id_jenis_kamar}', 'TrxReservasiKamarController@fixCheckInWithDeposit');
+        
         Route::get('reservasi/kamar/check-in/{id_trx_reservasi}/cek-waktu', 'TrxReservasiKamarController@cekWaktuCheckIn');
     });
 
