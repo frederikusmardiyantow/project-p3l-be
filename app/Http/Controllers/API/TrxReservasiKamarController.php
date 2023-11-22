@@ -30,7 +30,7 @@ class TrxReservasiKamarController extends Controller
         return new PostResource('T', 'Berhasil Ambil Data All Trx Kamar..', $data);
     }
 
-    function cekWaktuCheckIn(string $id_trx_reservasi){
+    public function cekWaktuCheckIn(string $id_trx_reservasi){
         $today = Carbon::now();
 
         $trxReservasi = MasterTrxReservasi::find($id_trx_reservasi);
@@ -65,7 +65,7 @@ class TrxReservasiKamarController extends Controller
         ], 200);
     }
 
-    function fixCheckIn(Request $request, string $id_trx_reservasi){
+    public function fixCheckIn(Request $request, string $id_trx_reservasi){
         $userLogin = Auth::user();
         $data = $request->all();
         
@@ -79,13 +79,14 @@ class TrxReservasiKamarController extends Controller
 
         $validasi = [
             'kamar' => 'required|array',
-            'deposit' => 'required|numeric'
+            'deposit' => 'required|numeric|min:1'
         ];
 
         $validate = Validator::make($data, $validasi,[
             'array' => ':Attribute harus berupa array',
             'required' => ':Attribute wajib diisi!',
-            'numeric' => ':Attribute hanya boleh berupa Angka'
+            'numeric' => ':Attribute hanya boleh berupa Angka',
+            'min' => ':Attribute tidak boleh <= 0'
         ]);
 
         if($validate->fails()){
@@ -96,7 +97,7 @@ class TrxReservasiKamarController extends Controller
         }
 
         // Cari ketersediaan data di db
-        $trxReservasi = MasterTrxReservasi::find($id_trx_reservasi);
+        $trxReservasi = MasterTrxReservasi::with('customers', 'pic', 'fo', 'trxKamars', 'trxLayanans', 'invoices')->find($id_trx_reservasi);
         if(!$trxReservasi || $trxReservasi->flag_stat == 0){
             return response([
                 'status' => 'F',
@@ -105,15 +106,30 @@ class TrxReservasiKamarController extends Controller
         }
 
         foreach($data['kamar'] as $kamar){
-            if (!isset($kamar['id_kamar']) || !isset($kamar['id_jenis_kamar'])) {
+            if (!isset($kamar['id_kamar'])) {
                 return response([
                     'status' => 'F',
-                    'message' => 'ID Kamar dan ID Jenis Kamar harus ada'
+                    'message' => 'ID Kamar harus ada'
                 ], 400);
             }
         }
+        // Menghitung berapa kali masing-masing nilai muncul
+        $countValues = array_count_values(array_column($data['kamar'], 'id_kamar'));
+
+        // Memeriksa apakah ada nilai yang muncul lebih dari satu kali
+        $nonUniqueValues = array_filter($countValues, function ($count) {
+            return $count > 1;
+        });
+
+        if (!empty($nonUniqueValues)) {
+            return response([
+                'status' => 'F',
+                'message' => 'Nilai id_kamar harus unik dalam array kamar.'
+            ], 400);
+        }
 
         // cek id kamar yg terinput valid semua
+        $tempNoKamar = []; //tuk nampung semua nomor kamar yang dipilih
         foreach($data['kamar'] as $kamar){
             $MstKamar = MasterKamar::find($kamar['id_kamar']);
             if(!$MstKamar || $MstKamar->flag_stat == 0){
@@ -122,14 +138,16 @@ class TrxReservasiKamarController extends Controller
                     'message' => 'Kamar ada yang tidak diketahui!'
                 ], 404);
             }
+            //lakukan push ke tempNoKamar
+            array_push($tempNoKamar, $MstKamar->nomor_kamar);
         }
 
-        // cek jumlah data berdasar id trx dan id_jenis kamar
+        // cek jumlah data berdasar id trx 
         $cekData = TrxReservasiKamar::where('id_trx_reservasi', $id_trx_reservasi)
         ->where('flag_stat', '!=', 0)
         ->get();
 
-        if(count($data['id_kamar']) != count($cekData)){
+        if(count($data['kamar']) != count($cekData)){
             return response([
                 'status' => 'F',
                 'message' => 'Jumlah Kamar tidak sesuai reservasi!'
@@ -154,179 +172,44 @@ class TrxReservasiKamarController extends Controller
             ], 403);
         }
 
-        foreach($data['kamar'] as $kamar){
-            if($cekData['id_jenis_kamar'] == $kamar['id_jenis_kamar']){
-                $cekData['id_kamar'] = $kamar['id_kamar'];
+        try{
+            foreach($cekData as $cek){
+                //lakukan perulangan berdasar tempNoKamar yg sudah didifine diatas td
+                foreach($tempNoKamar as $kamar){
+                    $MstKamar = MasterKamar::with('jenisKamars')->where('nomor_kamar', $kamar)->first();
+                    if($cek['id_jenis_kamar'] == $MstKamar->id_jenis_kamar){
+                        $cek->id_kamar = $MstKamar->id;
+                        $cek->updated_by = $userLogin['nama_pegawai'];
+                        unset($tempNoKamar[array_search($kamar, $tempNoKamar)]);
+                        break;
+                    }
+                }
             }
-        }
-        $trxReservasi['id_fo'] = $userLogin->id;
-        $trxReservasi['deposit'] = $data['deposit'];
-        $trxReservasi['status'] = "In";
 
-        if(!$trxReservasi->save() && !$cekData->save()){
+            if(count($tempNoKamar) != 0){
+                return response([
+                    'status' => 'F',
+                    'message' => 'Check In gagal karena jenis dari kamar '. implode(', ', $tempNoKamar).' tidak cocok dengan pesanan!'
+                ], 403);
+            }else{
+                $trxReservasi['id_fo'] = $userLogin->id;
+                $trxReservasi['deposit'] = $data['deposit'];
+                $trxReservasi['status'] = "In";
+                $trxReservasi['updated_by'] = $userLogin['nama_pegawai'];
+                // Setelah perulangan selesai, simpan semua objek yang telah diubah
+                foreach ($cekData as $cek) {
+                    $cek->save();
+                }
+                $trxReservasi->save();
+
+                return new PostResource('T', 'Berhasil Membayarkan deposit dan Check In untuk semua kamar yang dipilih', $trxReservasi);
+            }
+        } catch (\Exception $e) {
+            // Tangkap pengecualian dan berikan respons dengan pesan kesalahan
             return response([
                 'status' => 'F',
-                'message' => 'Gagal membayarkan deposit dan check in!'
-            ], 400);
+                'message' => 'Gagal melakukan update: ' . $e->getMessage()
+            ], 500);
         }
-
-        return new PostResource('T', 'Berhasil Membayarkan deposit dan Check In', $trxReservasi);
     }
-
-    // function pilihKamar(Request $request, string $id_trx_reservasi) {
-    //     $userLogin = Auth::user();
-    //     $data = $request->all();
-    //     $today = Carbon::now(); //untuk waktu reservasi dan generate id booking
-        
-    //     $jenis = $userLogin->jenis_customer;
-    //     if($jenis){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => "Anda Customer Jangan coba-coba check-in sendiri ya.."
-    //         ], 403);
-    //     }
-
-    //     $validasi = [
-    //         'id_kamar' => 'required'
-    //     ];
-
-    //     $validate = Validator::make($data, $validasi,[
-    //         'required' => ':Attribute wajib diisi!',
-    //     ]);
-
-    //     if($validate->fails()){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => $validate->errors()
-    //         ], 400);
-    //     }
-
-    //     $kamar = MasterKamar::find($data['id_kamar']);
-    //     if(!$kamar || $kamar->flag_stat == 0){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Kamar tidak diketahui!'
-    //         ], 404);
-    //     }
-    //     $trxReservasi = MasterTrxReservasi::find($id_trx_reservasi);
-    //     if(!$trxReservasi || $trxReservasi->flag_stat == 0){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Trx Reservasi tidak diketahui!'
-    //         ], 404);
-    //     }
-    //     if($trxReservasi->status == 'Batal'){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Trx Reservasi sudah dibatalkan!'
-    //         ], 403);
-    //     }else if($trxReservasi->status == 'Out'){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Trx Reservasi sudah berstatus out!'
-    //         ], 403);
-    //     }else if($trxReservasi->status != 'Terkonfirmasi' || $trxReservasi->status != 'In'){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Trx Reservasi belum dibayar!'
-    //         ], 403);
-    //     }
-
-    //     $cek = TrxReservasiKamar::where('id_trx_reservasi', $id_trx_reservasi)->where('flag_stat', '!=', 0)
-    //     ->where('id_kamar', '=', $data['id_kamar'])
-    //     ->first();
-
-    //     if ($cek) {
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Error! Kamar sudah dipilih!'
-    //         ], 404);
-    //     }
-
-    //     $trxKamar = TrxReservasiKamar::where('id_trx_reservasi', $id_trx_reservasi)->where('flag_stat', '!=', 0)
-    //     ->where('id_kamar', '=', null)
-    //     ->first(); // Use first() to get a single record
-
-    //     if (!$trxKamar) {
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Error! Data Trx Reservasi di Trx Kamar tidak ada atau sudah terisi!'
-    //         ], 404);
-    //     }
-        
-    //     $trxKamar['id_kamar'] = $data['id_kamar'];
-
-    //     if(!$trxKamar->save()){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Gagal memasukkan kamar!'
-    //         ], 400);
-    //     }
-
-    //     return new PostResource('T', 'Berhasil Memasukkan data kamar', $trxKamar);
-    // }
-
-    // function batalPilihKamar(Request $request, string $id_trx_reservasi){
-    //     $userLogin = Auth::user();
-    //     $data = $request->all();
-    //     $jenis = $userLogin->jenis_customer;
-    //     if($jenis){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => "Anda Customer Jangan coba-coba batalkan check-in sendiri ya.."
-    //         ], 403);
-    //     }
-
-    //     $validasi = [
-    //         'id_kamar' => 'required'
-    //     ];
-
-    //     $validate = Validator::make($data, $validasi,[
-    //         'required' => ':Attribute wajib diisi!',
-    //     ]);
-
-    //     if($validate->fails()){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => $validate->errors()
-    //         ], 400);
-    //     }
-
-    //     $kamar = MasterKamar::find($data['id_kamar']);
-    //     if(!$kamar || $kamar->flag_stat == 0){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Kamar tidak diketahui!'
-    //         ], 404);
-    //     }
-    //     $trxReservasi = MasterTrxReservasi::find($id_trx_reservasi);
-    //     if(!$trxReservasi || $trxReservasi->flag_stat == 0){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Trx Reservasi tidak diketahui!'
-    //         ], 404);
-    //     }
-
-    //     $trxKamar = TrxReservasiKamar::where('id_trx_reservasi', $id_trx_reservasi)->where('flag_stat', '!=', 0)
-    //     ->where('id_kamar', '=', $data['id_kamar'])
-    //     ->first(); // Use first() to get a single record
-
-    //     if (!$trxKamar) {
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Error! Data Trx Reservasi di Trx Kamar tidak ada!'
-    //         ], 404);
-    //     }
-        
-    //     $trxKamar['id_kamar'] = null;
-
-    //     if(!$trxKamar->save()){
-    //         return response([
-    //             'status' => 'F',
-    //             'message' => 'Gagal membatalkan kamar!'
-    //         ], 400);
-    //     }
-
-    //     return new PostResource('T', 'Berhasil membatalkan kamar', $trxKamar);
-    // }
 }

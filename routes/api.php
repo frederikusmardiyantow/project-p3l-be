@@ -83,8 +83,7 @@ Route::namespace('API')->group(function() {
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Front Office'])->group(function (){
-        // Route::post('reservasi/kamar/check-in/{id_trx_reservasi}/{id_jenis_kamar}', 'TrxReservasiKamarController@fixCheckInWithDeposit');
-        
+        Route::post('reservasi/kamar/check-in/{id_trx_reservasi}', 'TrxReservasiKamarController@fixCheckIn');
         Route::get('reservasi/kamar/check-in/{id_trx_reservasi}/cek-waktu', 'TrxReservasiKamarController@cekWaktuCheckIn');
     });
 
