@@ -166,8 +166,9 @@ class KamarSediaController extends Controller
                 }
             }
             return [
-                'id' => $kamar->id,
-                'no_kamar' => $kamar->nomor_kamar,
+                // 'id' => $kamar->id,
+                // 'no_kamar' => $kamar->nomor_kamar,
+                'kamar' => $kamar,
                 'ketersediaan' => $ketersediaan,
             ];
         });
