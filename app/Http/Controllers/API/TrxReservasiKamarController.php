@@ -48,6 +48,10 @@ class TrxReservasiKamarController extends Controller
             ], 403);
         }
         if($today > $trxReservasi->waktu_check_in){
+            $trxReservasi->update([
+                'status' => 'Batal'
+            ]);
+            
             return response([
                 'status' => 'F',
                 'message' => 'Sudah tidak dapat melakukan check-in. Melewati Batas!'
