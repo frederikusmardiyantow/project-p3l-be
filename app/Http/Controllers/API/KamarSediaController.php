@@ -10,8 +10,10 @@ use App\Models\MasterSeason;
 use App\Models\MasterTrxReservasi;
 use App\Models\TrxReservasiKamar;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
+use stdClass;
 use Validator;
 
 class KamarSediaController extends Controller
@@ -147,5 +149,30 @@ class KamarSediaController extends Controller
         return new PostResource('T', 'Belum ada reservasi', $jumlahKamarPerJenis);
     }
     
+    public function NomorKamarTersedia(){
+        $dataKamar = MasterKamar::with(["jenisKamars", "trxKamars", "trxKamars.trxReservasis"])->where('flag_stat', 1)->get();
+        $tanggal_hari_ini = date("Y-m-d");
+
+        $kamars = $dataKamar->map(function($kamar) use ($tanggal_hari_ini) {
+            $ketersediaan = 1;
+
+            foreach ($kamar->trxKamars as $reservasiKamar) {
+                $checkIn = date("Y-m-d", strtotime($reservasiKamar->trxReservasis->waktu_check_in));
+                $checkOut = date("Y-m-d", strtotime($reservasiKamar->trxReservasis->waktu_check_out));
+
+                if($tanggal_hari_ini >= $checkIn && $tanggal_hari_ini <= $checkOut){
+                    $ketersediaan = 0;
+                    break;
+                }
+            }
+            return [
+                'no_kamar' => $kamar->nomor_kamar,
+                'ketersediaan' => $ketersediaan,
+            ];
+        });
+
+        return new PostResource('T', 'Berhasil Ambil Data Kamar '.$tanggal_hari_ini, $kamars);
+
+    }
     
 }
