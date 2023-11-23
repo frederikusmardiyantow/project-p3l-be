@@ -47,6 +47,12 @@ class TrxReservasiKamarController extends Controller
                 'message' => 'Belum bisa Check In! Waktu Check In di '. Carbon::parse($trxReservasi->waktu_check_in)->format('d M Y \p\u\k\u\l H:i')
             ], 403);
         }
+        if($today > $trxReservasi->waktu_check_in){
+            return response([
+                'status' => 'F',
+                'message' => 'Sudah tidak dapat melakukan check-in. Melewati Batas!'
+            ], 403);
+        }
         if($trxReservasi->status == 'Batal' || $trxReservasi->status == 'Out' || $trxReservasi->status == 'In'){
             return response([
                 'status' => 'F',
