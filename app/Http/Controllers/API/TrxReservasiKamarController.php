@@ -165,7 +165,7 @@ class TrxReservasiKamarController extends Controller
             ], 403);
         }
 
-        if($trxReservasi->deposit != null){
+        if($trxReservasi->deposit != 0){
             return response([
                 'status' => 'F',
                 'message' => 'Deposit pada Trx Reservasi sudah terbayar!'
