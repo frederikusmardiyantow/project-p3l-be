@@ -32,6 +32,7 @@ class LaporanController extends Controller
             $namaBulan = $carbonDate->translatedFormat('F'); // Menggunakan translatedFormat untuk mendapatkan nama bulan dalam bahasa Indonesia
 
             $hasilLaporan[$row->bulan] = [
+                'no' => $row->bulan,
                 'bulan' => $namaBulan,
                 'tahun' => $row->tahun,
                 'jumlah_customer' => $row->jumlah_customer,
@@ -45,6 +46,7 @@ class LaporanController extends Controller
                 $namaBulan = $carbonDate->translatedFormat('F');
 
                 $hasilLaporan[$bulan] = [
+                    'no' => $bulan,
                     'bulan' => $namaBulan,
                     'tahun' => date('Y'),
                     'jumlah_customer' => 0,
