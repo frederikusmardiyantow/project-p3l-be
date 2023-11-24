@@ -142,7 +142,7 @@ class TrxReservasiKamarController extends Controller
         // cek id kamar yg terinput valid semua
         $tempNoKamar = []; //tuk nampung semua nomor kamar yang dipilih
         foreach($data['kamar'] as $kamar){
-            $MstKamar = MasterKamar::find($kamar['id_kamar']);
+            $MstKamar = MasterKamar::where('flag_stat', '!=', 0)->find($kamar['id_kamar']);
             if(!$MstKamar || $MstKamar->flag_stat == 0){
                 return response([
                     'status' => 'F',
@@ -187,7 +187,7 @@ class TrxReservasiKamarController extends Controller
             foreach($cekData as $cek){
                 //lakukan perulangan berdasar tempNoKamar yg sudah didifine diatas td
                 foreach($tempNoKamar as $kamar){
-                    $MstKamar = MasterKamar::with('jenisKamars')->where('nomor_kamar', $kamar)->first();
+                    $MstKamar = MasterKamar::with('jenisKamars')->where('nomor_kamar', $kamar)->where('flag_stat', '!=', 0)->first();
                     if($cek['id_jenis_kamar'] == $MstKamar->id_jenis_kamar){
                         $cek->id_kamar = $MstKamar->id;
                         $cek->updated_by = $userLogin['nama_pegawai'];
