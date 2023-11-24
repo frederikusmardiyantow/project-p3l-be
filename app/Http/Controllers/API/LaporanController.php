@@ -14,6 +14,7 @@ class LaporanController extends Controller
     public function laporanCustBaru(string $tahun){
         // Mendapatkan seluruh bulan dalam setahun
         $seluruhBulan = range(1, 12);
+        $total = 0;
 
         // Menggunakan Query Builder Laravel untuk mengambil data
         $data = MasterCustomer::select(
@@ -30,6 +31,7 @@ class LaporanController extends Controller
         foreach ($data as $row) {
             $carbonDate = Carbon::createFromDate($row->tahun, $row->bulan, 1);
             $namaBulan = $carbonDate->translatedFormat('F'); // Menggunakan translatedFormat untuk mendapatkan nama bulan dalam bahasa Indonesia
+            $total += $row->jumlah_customer;
 
             $hasilLaporan[$row->bulan] = [
                 'no' => $row->bulan,
@@ -59,7 +61,10 @@ class LaporanController extends Controller
 
         return response([
             'status' => 'T',
-            'data' => array_values($hasilLaporan),
+            'data' => [
+                'total_customer' => $total,
+                'laporan' => array_values($hasilLaporan),
+            ] 
         ], 200);
     }
 
