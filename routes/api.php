@@ -72,14 +72,14 @@ Route::namespace('API')->group(function() {
         Route::post('transaksi/reservasi/upload/{id}','MasterTrxReservasiController@uploadBuktiPembayaran');
         Route::post('transaksi/pembatalan/kamar/{id}','MasterTrxReservasiController@pembatalanReservasi');
         Route::get('transaksi/pembatalan/cekPengembalian/{id}','MasterTrxReservasiController@cekPengembalianDanaOrTidak');
-        Route::apiResource('layanan', MasterLayananBerbayarController::class);
         Route::post('transaksi/layanan', 'TrxLayananBerbayarController@store');
-        Route::get('export/pdf/{id}', 'PDFController@exportPDF');
+        Route::get('export/pdf/{id}', 'PDFController@exportPDFTandaTerima');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Sales & Marketing,customer,Front Office'])->group(function (){
         
         Route::get('transaksi/reservasi/show', 'MasterTrxReservasiController@index');
         Route::get('transaksi/reservasi/show_all', 'MasterTrxReservasiController@getDataForAllFlag');
+        Route::apiResource('layanan', MasterLayananBerbayarController::class);
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Front Office'])->group(function (){
