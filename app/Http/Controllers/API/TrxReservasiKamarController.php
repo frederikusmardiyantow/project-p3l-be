@@ -32,6 +32,7 @@ class TrxReservasiKamarController extends Controller
 
     public function cekWaktuCheckIn(string $id_trx_reservasi){
         $today = Carbon::now();
+        $tanggal_hr_ini = date('Y-m-d');
 
         $trxReservasi = MasterTrxReservasi::find($id_trx_reservasi);
         if(!$trxReservasi || $trxReservasi->flag_stat == 0){
@@ -47,7 +48,7 @@ class TrxReservasiKamarController extends Controller
                 'message' => 'Belum bisa Check In! Waktu Check In di '. Carbon::parse($trxReservasi->waktu_check_in)->format('d M Y \p\u\k\u\l H:i')
             ], 403);
         }
-        if($today > $trxReservasi->waktu_check_in){
+        if($tanggal_hr_ini > date('Y-m-d', strtotime($trxReservasi->waktu_check_in))){
             $trxReservasi->update([
                 'status' => 'Batal'
             ]);
