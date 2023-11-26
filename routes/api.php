@@ -80,6 +80,7 @@ Route::namespace('API')->group(function() {
         Route::get('transaksi/reservasi/show_all', 'MasterTrxReservasiController@getDataForAllFlag');
         Route::apiResource('layanan', MasterLayananBerbayarController::class);
         Route::get('transaksi/detail/{id}', 'MasterTrxReservasiController@show');
+        Route::get('export/nota-lunas/pdf/{id}', 'PDFController@exportPDFNotaLunas');
     });
     Route::middleware(['auth:sanctum', 'checkRole:Front Office'])->group(function (){
         Route::post('reservasi/kamar/check-in/{id_trx_reservasi}', 'TrxReservasiKamarController@fixCheckIn');
