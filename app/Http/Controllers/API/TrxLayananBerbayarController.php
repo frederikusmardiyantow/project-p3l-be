@@ -76,18 +76,35 @@ class TrxLayananBerbayarController extends Controller
         $addData['created_by'] = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
         $addData['updated_by'] = $userLogin['nama_pegawai'] ? $userLogin['nama_pegawai'] : 'Customer: '.$userLogin['nama_customer'];
 
-        $trxLayanan = TrxLayananBerbayar::create($addData);
-        $trxLayanan->trxReservasis;
-        $trxLayanan->layanans;
+        // cari apakah data layanan yg dipesan sudah ada sebelumnya atau belum. dilihat juga waktu pemakaiannya
+        $adaLayanan = TrxLayananBerbayar::with('layanans', 'trxReservasis')->where('id_layanan', $addData['id_layanan'])->where('id_trx_reservasi', $addData['id_trx_reservasi'])->where('waktu_pemakaian', $addData['waktu_pemakaian'])->first();
 
-        if(!$trxLayanan){
-            return response([
-                'status' => 'F',
-                'message' => 'Terjadi kesalahan pada server'
-            ], 500);
+        if($adaLayanan){
+            $adaLayanan->jumlah += $addData['jumlah'];
+            $adaLayanan->total_harga += $addData['total_harga'];
+            
+            if(!$adaLayanan->save()){
+                return response([
+                    'status' => 'F',
+                    'message' => 'Gagal mengubah data layanan!'
+                ], 400);
+            }
+
+            return new PostResource('T', 'Berhasil Mengubah Data Layanan', $adaLayanan);
+        }else{
+            $trxLayanan = TrxLayananBerbayar::create($addData);
+            $trxLayanan->trxReservasis;
+            $trxLayanan->layanans;
+    
+            if(!$trxLayanan){
+                return response([
+                    'status' => 'F',
+                    'message' => 'Terjadi kesalahan pada server'
+                ], 500);
+            }
+            return new PostResource('T', 'Berhasil Menambah Data Layanan', $trxLayanan);
         }
 
-        return new PostResource('T', 'Berhasil Menambah Data Tarif', $trxLayanan);
     }
 
     /**
