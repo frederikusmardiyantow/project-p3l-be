@@ -215,9 +215,73 @@ class MasterTrxReservasiController extends Controller
     {
         $reservasi = MasterTrxReservasi::with(["customers", "pic", "fo", "trxLayanans.layanans", "trxKamars.jenisKamars", "trxKamars.kamars", "invoices.pegawais.role"])->find($id);
 
+        // hitung jumlah masing-masing jenis kamar yang dipesan dan total harga
+        $trxKamarPesananPerJenis = [];
+        $totalHargaKamarAll = 0;
+        foreach ($reservasi->trxKamars as $trx) {
+            $jenisKamar = $trx->jenisKamars->jenis_kamar;
+            $hargaPerMalam = $trx->harga_per_malam;
+            // $totalPerJenis = $hargaPerMalam;
+            $totalHargaKamarAll += $trx->harga_per_malam;
+        
+            if (array_key_exists($jenisKamar, $trxKamarPesananPerJenis)) {
+                $trxKamarPesananPerJenis[$jenisKamar]->jumlah += 1;
+                $trxKamarPesananPerJenis[$jenisKamar]->total_per_jenis += $hargaPerMalam;
+            } else {
+                $trxKamarPesananPerJenis[$jenisKamar] = (object) [
+                    'jenis_kamar' => $jenisKamar,
+                    'jumlah' => 1,
+                    'harga_per_malam' => $hargaPerMalam,
+                    'total_per_jenis' => $hargaPerMalam,
+                ];
+            }
+        }
+
+        // hitung jumlah masing-masing trx layanan yang dipesan dan total harga
+        $trxLayananPesan = [];
+        $totalHargaLayananAll = 0;
+        foreach ($reservasi->trxLayanans as $trx) {
+            $namaLayanan = $trx->layanans->nama_layanan;
+            $hargaSatuan = $trx->layanans->harga;
+            $totalHargaLayananAll += $trx->total_harga;
+            $tglPemakaian = Carbon::parse($trx->waktu_pemakaian)->format('Y-m-d');
+        
+            // Pengecekan menggunakan namaLayanan dan tgl_pemakaian
+            $key = $namaLayanan . '_' . $tglPemakaian;
+
+            if (array_key_exists($key, $trxLayananPesan)) {
+                $trxLayananPesan[$key]->jumlah += $trx->jumlah;
+                $trxLayananPesan[$key]->total_per_layanan += $hargaSatuan;
+            } else {
+                $trxLayananPesan[$key] = (object) [
+                    'nama_layanan' => $namaLayanan,
+                    'tgl_pemakaian' => $tglPemakaian,
+                    'jumlah' => $trx->jumlah,
+                    'harga_per_satuan' => $hargaSatuan,
+                    'total_per_layanan' => $trx->total_harga,
+                ];
+            }
+        }
+
+        // hitung pajak layanan (10%)
+        $pajakLayanan = ($totalHargaLayananAll * 0.1);
+        // hitung total keseluruhan yang harus dibayar
+        $total_semua = (($totalHargaKamarAll * $reservasi['jumlah_malam']) + $totalHargaLayananAll + $pajakLayanan);
+        // hitung uang yang kurang atau yg harus dikembalikan
+        $kurang_atau_kembali = $total_semua - $reservasi->uang_jaminan - $reservasi->deposit;
+
         if(!is_null($reservasi)){
+            $reservasi['trxKamarPesananPerJenis'] = $trxKamarPesananPerJenis;
+            $reservasi['trxLayananPesan'] = $trxLayananPesan;
+            $reservasi['totalHargaLayananAll'] = $totalHargaLayananAll;
+            $reservasi['totalHargaKamarAll'] = $totalHargaKamarAll;
+            $reservasi['pajakLayanan'] = $pajakLayanan;
+            $reservasi['total_semua'] = $total_semua;
+            $reservasi['kurang_atau_kembali'] = $kurang_atau_kembali;
+            
             return new PostResource('T', 'Berhasil Mendapatkan Data Trx Reservasi '.$reservasi->customers['nama_customer'], $reservasi);
         }
+
 
         return response([
             'status' => 'F',
