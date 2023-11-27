@@ -86,6 +86,8 @@ Route::namespace('API')->group(function() {
         Route::post('reservasi/kamar/check-in/{id_trx_reservasi}', 'TrxReservasiKamarController@fixCheckIn');
         Route::get('reservasi/kamar/check-in/{id_trx_reservasi}/cek-waktu', 'TrxReservasiKamarController@cekWaktuCheckIn');
         Route::get('reservasi/kamar/tersedia', 'KamarSediaController@NomorKamarTersedia');
+        Route::get('reservasi/kamar/check-out/{id_trx_reservasi}', 'CheckOutController@TampilDataNotaLunasCheckOut');
+        Route::post('reservasi/kamar/check-out', 'CheckOutController@CheckOut');
     });
     Route::get('laporan/customer-baru/{tahun}', 'LaporanController@laporanCustBaru');
     Route::get('laporan/customer/reservasi-terbanyak/{tahun}', 'LaporanController@laporan5CustTerbanyak');

@@ -11,6 +11,7 @@ class Invoice extends Model
     use HasFactory;
     
     protected $fillable = [
+        'no_invoice',
         'id_trx_reservasi',
         'id_pegawai',
         'tgl_lunas',

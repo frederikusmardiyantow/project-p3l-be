@@ -3,105 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PostResource;
 use App\Models\Invoice;
 use App\Models\MasterTrxReservasi;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use PDF;
+use Illuminate\Support\Facades\Auth;
+use Validator;
 
-class PDFController extends Controller
+class CheckOutController extends Controller
 {
-    public function exportPDFTandaTerima(string $id) {
-
-        $cekReservasi = MasterTrxReservasi::with(["trxKamars", "trxKamars.jenisKamars", "trxKamars.kamars" ,"customers", "pic", "fo"])->find($id);
-        if(!$cekReservasi){
-            return response([
-                'status' => 'F',
-                'message' => 'Data Trx Reservasi tidak ditemukan!'
-            ], 404);
-        }
-        if($cekReservasi['status'] == 'Menunggu Pembayaran'){
-            return response([
-                'status' => 'F',
-                'message' => 'Maaf, Reservasi belum dibayar!'
-            ], 403);
-        }
-        if($cekReservasi['status'] == 'Batal'){
-            return response([
-                'status' => 'F',
-                'message' => 'Reservasi sudah dibatalkan!'
-            ], 403);
-        }
-        // hitung jumlah masing-masing jenis kamar yang dipesan dan total harga
-        $jumlahKamarPerJenis = [];
-        $totalHarga = 0;
-        foreach ($cekReservasi->trxKamars as $trx) {
-            $jenisKamar = $trx->jenisKamars->jenis_kamar;
-            $hargaPerMalam = $trx->harga_per_malam;
-            // $totalPerJenis = $hargaPerMalam;
-            $totalHarga += $trx->harga_per_malam;
-        
-            if (array_key_exists($jenisKamar, $jumlahKamarPerJenis)) {
-                $jumlahKamarPerJenis[$jenisKamar]->jumlah += 1;
-                $jumlahKamarPerJenis[$jenisKamar]->total_per_jenis += $hargaPerMalam;
-            } else {
-                $jumlahKamarPerJenis[$jenisKamar] = (object) [
-                    'jenis_kamar' => $jenisKamar,
-                    'jumlah' => 1,
-                    'harga_per_malam' => $hargaPerMalam,
-                    'total_per_jenis' => $hargaPerMalam,
-                ];
-            }
-        }        
-        // return response([
-        //     'data' => $jumlahKamarPerJenis
-        // ]);
-        
-        // gunakan carbon untuk ngeformat tanggal
-        $tanggal_cetak = Carbon::now();
-        $waktu_reservasi = Carbon::parse($cekReservasi['waktu_reservasi']);
-        $check_in = Carbon::parse($cekReservasi['waktu_check_in']);
-        $check_out = Carbon::parse($cekReservasi['waktu_check_out']);
-        $tanggal_pembayaran = Carbon::parse($cekReservasi['waktu_pembayaran']);
-
-        $data = [
-            'id_booking' => $cekReservasi['id_booking'],
-            'tanggal_reservasi' => $waktu_reservasi->format('d F Y H:i:s'),
-            'nama' => $cekReservasi->customers->nama_customer,
-            'alamat' => $cekReservasi->customers->alamat,
-            'check_in' => $check_in->format('d F Y H:i:s'),
-            'check_out' => $check_out->format('d F Y H:i:s'),
-            'dewasa' => $cekReservasi->jumlah_dewasa,
-            'anak_anak' => $cekReservasi->jumlah_anak_anak,
-            'tanggal_cetak' => $tanggal_cetak->format('d M Y H:i:s'),
-            'tanggal_pembayaran' => $tanggal_pembayaran->format('d F Y H:i:s'),
-            'total_harga' => $totalHarga * $cekReservasi['jumlah_malam'],
-            'jumlahKamarPerJenis' => $jumlahKamarPerJenis,
-            'jumlahMalam' => $cekReservasi['jumlah_malam'],
-            'req_layanan' => $cekReservasi->req_layanan
-        ]; // Data yang akan dimasukkan ke dalam PDF
-
-        $pdf = PDF::loadView('tanda-terima', $data);
-
-        // Tambahkan gambar ke dalam PDF
-        $pdf->getDomPDF()->getOptions()->set('isPhpEnabled', true);
-        $pdf->getDomPDF()->getOptions()->set('isHtml5ParserEnabled', true);
-
-        $pdf->getDomPDF()->loadHtml(view('tanda-terima', $data)->render());
-
-        // Render PDF
-        $pdf->getDomPDF()->render();
-
-        return $pdf->stream('tanda-terima-pemesanan.pdf');
-
-        // $data = [];
-
-        // $pdf = PDF::loadView('tanda-terima', $data);
-        // return $pdf->download('tanda-terima-pemesanan.pdf');
-    }
-    public function exportPDFNotaLunas(string $id) {
-
-        $cekReservasi = MasterTrxReservasi::with(["trxKamars", "trxKamars.jenisKamars", "trxKamars.kamars", "trxLayanans", "trxLayanans.layanans", "customers", "pic", "fo"])->find($id);
+    public function TampilDataNotaLunasCheckOut(string $id_trx_reservasi) {
+        $cekReservasi = MasterTrxReservasi::with(["trxKamars", "trxKamars.jenisKamars", "trxKamars.kamars", "trxLayanans", "trxLayanans.layanans", "customers", "pic", "fo"])->find($id_trx_reservasi);
         if(!$cekReservasi){
             return response([
                 'status' => 'F',
@@ -120,8 +33,8 @@ class PDFController extends Controller
                 'message' => 'Nota Lunas belum bisa digenerate karena status reservasi belum check out!'
             ], 403);
         }
-        // Catatan: invoice ini cuma buat ambil data no invoice dan id pegawainya. untuk total harga kamar dan layanan, pajak, dan total semua dihitung dalam kode ini (tidak diambil dari tabel invoice. Untuk mencocokan kebenaran data aja si, jd dihitung ulang)
-        $invoice = Invoice::with(["trxReservasis", "pegawais"])->where('id_trx_reservasi', $id)->first();
+        // Catatan: invoice ini cuma buat ambil data no invoice dan id_trx_reservasi pegawainya. untuk total harga kamar dan layanan, pajak, dan total semua dihitung dalam kode ini (tidak diambil dari tabel invoice. Untuk mencocokan kebenaran data aja si, jd dihitung ulang)
+        $invoice = Invoice::with(["trxReservasis", "pegawais"])->where('id_trx_reservasi', $id_trx_reservasi)->first();
         if(!$invoice){
             return response([
                 'status' => 'F',
@@ -215,29 +128,95 @@ class PDFController extends Controller
             'uang_kembali' => ($kurang_atau_kembali < 0 ? $kurang_atau_kembali * -1 : null)
         ]; // Data yang akan dimasukkan ke dalam PDF
 
-        // return response([
-        //     'data' => $data,
-        //     'total_kamar' => $totalHargaKamarAll,
-        //     'total_layanan' => $totalHargaLayananAll,
-        //     'total_pajak' => $pajakLayanan
-        // ]);
+        return new PostResource('T', 'Berhasil Ambil Data Check Out..', $data);
 
-        $pdf = PDF::loadView('nota-lunas', $data);
+    }
 
-        // Tambahkan gambar ke dalam PDF
-        $pdf->getDomPDF()->getOptions()->set('isPhpEnabled', true);
-        $pdf->getDomPDF()->getOptions()->set('isHtml5ParserEnabled', true);
+    public function CheckOut(Request $request) {
+        $userLogin = Auth::user();
+        $req = $request->all();
 
-        $pdf->getDomPDF()->loadHtml(view('nota-lunas', $data)->render());
+        $validate = Validator::make($req, [
+            'id_trx_reservasi' => 'required',
+            'tgl_lunas' => 'required',
+            'total_harga_kamar' => 'required|numeric',
+            'total_harga_layanan' => 'required|numeric',
+            'pajak_layanan' => 'required|numeric',
+            'total_semua' => 'required|numeric',
+            'temp_lebih_kurang' => 'required|in:0,1',
+            'total_lebih_kurang' => 'required|numeric',
+            'jumlah_bayar' => 'required|numeric'
+        ], [
+            'required' => ':Attribute wajib diisi.',
+            'numeric' => ':Attribute hanya boleh berupa angka',
+            'in' => ':Attribute hanya boleh berupa 0 (kurang) atau 1 (lebih)'
+        ]);
 
-        // Render PDF
-        $pdf->getDomPDF()->render();
+        if($validate->fails()){
+            return response([
+                'status' => 'F',
+                'message' => $validate->errors()
+            ], 400);
+        }
 
-        return $pdf->stream('nota-lunas-pemesanan.pdf');
+        $reservasi = MasterTrxReservasi::with(["trxKamars", "trxKamars.jenisKamars", "trxKamars.kamars", "trxLayanans", "trxLayanans.layanans", "customers", "pic", "fo"])->find($req['id_trx_reservasi']);
 
-        // $data = [];
+        if(is_null($reservasi)){
+            return response([
+                'status' => 'F',
+                'message' => 'Data Transaksi Reservasi tidak ditemukan!'
+            ], 404);
+        }
+        if($reservasi['status'] == 'Batal'){
+            return response([
+                'status' => 'F',
+                'message' => 'Reservasi sudah dibatalkan!'
+            ], 403);
+        }
+        if($reservasi['status'] == 'Out'){
+            return response([
+                'status' => 'F',
+                'message' => 'Reservasi memang sudah check out sebelumnya!'
+            ], 403);
+        }
 
-        // $pdf = PDF::loadView('tanda-terima', $data);
-        // return $pdf->download('tanda-terima-pemesanan.pdf');
+        if(($req['jumlah_bayar'] != $req['total_lebih_kurang']) && $req['temp_lebih_kurang'] == 0){
+            return response([
+                'status' => 'F',
+                'message' => 'Jumlah bayar harus sama dengan total kekurangan!'
+            ], 403);
+        }
+
+        // untuk generate no invoice
+        $increment = '001';
+        $jenis_customer = $reservasi['customers']->jenis_customer;
+        $tglTukIdInvoice = Carbon::parse($req['tgl_lunas'])->format('dmy');
+        $noInvoice = MasterTrxReservasi::select('id_booking')->where('id_booking', 'LIKE', $jenis_customer.$tglTukIdInvoice.'-%')->latest()->first();
+        if(!is_null($noInvoice)){
+            $parts = explode('-', $noInvoice);
+            $no = end($parts);
+            $increment = (int)$no + 1;
+        }
+        $angka = intval($increment); // Konversi ke integer
+        $pemformatan3digit = sprintf('%03d', $angka);
+        $req['no_invoice'] = $jenis_customer.$tglTukIdInvoice.'-'.$pemformatan3digit;
+
+        $req['id_pegawai'] = $userLogin['id'];
+        $req['created_by'] = $userLogin['nama_pegawai'];
+        
+        $checkOut = Invoice::create($req);
+        
+        if(!$checkOut){
+            return response([
+                'status' => 'F',
+                'message' => 'Terjadi kesalahan pada server'
+            ], 500);
+        }
+        $reservasi->update([
+            'status' => 'Out',
+            'updated_by' => $userLogin['nama_pegawai']
+        ]);
+        
+        return new PostResource('T', 'Transaksi '.$reservasi['id_booking'].' Sudah Selesai. Berhasil Check Out..', $checkOut);
     }
 }
