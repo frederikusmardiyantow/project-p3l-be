@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\JenisKamar;
 use App\Models\MasterCustomer;
 use App\Models\MasterTrxReservasi;
 use Carbon\Carbon;
@@ -210,6 +211,67 @@ class LaporanController extends Controller
         return response([
             'status' => 'T',
             'data' => $mergedResults,
+        ], 200);
+    }
+
+    public function laporanJumlahTamu(string $tahun, string $bulan) {
+
+        $merge = [];
+
+        $dataJenisKamar = JenisKamar::all();
+
+        $data = DB::table('master_trx_reservasis AS A')
+            ->join('trx_reservasi_kamars AS B', 'B.id_trx_reservasi', '=', 'A.id')
+            ->join('master_customers AS C', 'C.id', '=', 'A.id_customer')
+            ->join('jenis_kamars AS D', 'D.id', '=', 'B.id_jenis_kamar')
+            ->select('B.id_jenis_kamar AS id_jk', 'D.jenis_kamar AS jenis_kamar', 'C.jenis_customer AS type', DB::raw('COUNT(B.id) AS jumlah'))
+            ->whereYear('A.waktu_check_in', $tahun)
+            ->whereMonth('A.waktu_check_in', $bulan)
+            ->groupBy('id_jk', 'jenis_kamar', 'type') // Use the alias defined in the select statement
+            ->orderBy('id_jk', 'ASC')
+            ->get();
+
+        foreach ($data as $laporan) {
+            $no = $laporan->id_jk; // Use object notation
+
+            if (!isset($merge[$no])) {
+                $merge[$no] = [
+                    'id_jk' => $no,
+                    'jenis_kamar' => $laporan->jenis_kamar,
+                    'P' => 0,
+                    'G' => 0,
+                    'jumlah' => 0,
+                ];
+            }
+
+            $merge[$no][$laporan->type] += $laporan->jumlah; // Use object notation
+        }
+
+        // Calculate the total for each month
+        foreach ($merge as &$result) {
+            $result['jumlah'] = $result['P'] + $result['G'];
+        }
+
+        foreach ($dataJenisKamar as $jenis_kamar) {
+            if (!isset($merge[$jenis_kamar->id])) {
+
+                $merge[$jenis_kamar->id] = [
+                    'id_jk' => $jenis_kamar->id,
+                    'jenis_kamar' => $jenis_kamar->jenis_kamar,
+                    'P' => 0,
+                    'G' => 0,
+                    'jumlah' => 0,
+                ];
+            }
+        }
+        
+        // Convert the associative array to indexed array
+        $merge = array_values($merge);
+
+
+        return response([
+            'status' => 'T',
+            'data' => $merge,
         ], 200);
     }
 }

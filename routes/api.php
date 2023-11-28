@@ -92,6 +92,7 @@ Route::namespace('API')->group(function() {
     Route::get('laporan/customer-baru/{tahun}', 'LaporanController@laporanCustBaru');
     Route::get('laporan/customer/reservasi-terbanyak/{tahun}', 'LaporanController@laporan5CustTerbanyak');
     Route::get('laporan/pendapatan/{tahun}', 'LaporanController@laporanPendapatanPerJenisTamuPerBulan');
+    Route::get('laporan/jumlahTamu/{tahun}/{bulan}', 'LaporanController@laporanJumlahTamu');
 
 });
 
